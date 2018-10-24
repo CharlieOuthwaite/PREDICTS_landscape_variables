@@ -4,6 +4,8 @@
 #                                                          #
 ##%######################################################%##
 
+# running through the tutorial on Tim's GitHub
+
 rm(list = ls())
 
 # load libraries
