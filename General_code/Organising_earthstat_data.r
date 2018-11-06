@@ -15,6 +15,7 @@ rm(list = ls())
 library(ggplot2)
 library(ggthemes)
 library(reshape2)
+library(cowplot)
 
 
 # where is the yield data saved
@@ -40,8 +41,8 @@ for(file in files){
   # subset to desired columns
   cropdata <- cropdata[, c('lon', 'lat', 'yield')]
   
-  # standardise the yield column
-  cropdata$yield_stan <- scale(cropdata$yield, center = T, scale = T)
+  # standardise the yield column (if necessary)
+  #cropdata$yield_stan <- scale(cropdata$yield, center = T, scale = T)
   
   # add crop name to the dataframe
   cropdata$crop <- sub("_yield.csv", "", file)
@@ -55,30 +56,56 @@ for(file in files){
 # try to organise into a dif form with cast to see if any cells have more than one crop type
 
 # just keep the standardised yield column
-all_cropdata2 <- all_cropdata[, c("lon", "lat", "crop", "yield_stan")]
-all_cropdata2 <- dcast(all_cropdata, lon +lat ~ crop, value.var = "yield_stan")
+#all_cropdata2 <- all_cropdata[, c("lon", "lat", "crop", "yield_stan")] # if standardising
+#all_cropdata2 <- dcast(all_cropdata, lon +lat ~ crop, value.var = "yield_stan") # if standardising
+all_cropdata2 <- dcast(all_cropdata, lon +lat ~ crop, value.var = "yield")
 
 
+# now calculate total yield per cell
+# add a column detailing total yield per cell, sum relevent columns
+all_cropdata2$totals <- rowSums(all_cropdata2[, 3:ncol(all_cropdata2)], na.rm = TRUE)
 
 
+# save csv file of the standardised yields and total data
+#write.csv(all_cropdata2, paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/All_Crop_Yield_standardised.csv"))
+write.csv(all_cropdata2, paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/All_Crop_Yield.csv"))
 
-# load in one of the crops
-cropdata <- read.csv(paste0(datadir, "/", "barley_yield.csv"))
+# normality checks on yield totals?
+# histogram of totals
+p1 <- ggplot(all_cropdata2, aes(totals)) +
+  geom_histogram()
 
-### data is cufrrently in point format, need to create a polygon layer?
+# q-q plot of totals
+p2 <- ggplot(all_cropdata2, aes(sample = totals)) +
+  stat_qq() + 
+  stat_qq_line()
+
+# combine into one
+plot_grid(p1, p2) # organise with cowplot function
+
+# save the plot
+ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal_Standardised.png"))
+ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal.png"))
 
 
+# plot total yield on a global map
 
-ggplot(cropdata, aes(x = lon, y = lat)) +
-  borders("world", colour = "gray40", fill = "gray75", size = 0.3) +
+library(RColorBrewer)
+cols<-brewer.pal(4, "OrRd")
+
+ggplot(all_cropdata2, aes(x = lon, y = lat))+
+  borders("world", colour = "gray40", size = 0.3) +
   theme_map() +
-  geom_point(shape = 21, colour = "black", fill = "blue", alpha = 0.8, size = 3)
+  geom_raster(data = all_cropdata2, aes(x = lon, y = lat, fill=totals), inherit.aes = FALSE) +
+  #scale_fill_manual(values=cols) +
+#  guides(fill=guide_legend(title="Yield \n(standardised)")) +
+  guides(fill=guide_legend(title="Yield \n(Tons per hectare)")) +
+  labs(title = paste("Total yield (17 crops), Earthstat")) +
+  theme(legend.position="bottom")+
+  theme_void()+ coord_equal()
 
-
-ggplot(cropdata, aes(x = lon, y = lat))+
-  borders("world", colour = "gray40", fill = "gray75", size = 0.3) +
-  theme_map() +
-  geom_polygon(fill = NA, colour = "black", size=0.2)+
-  geom_raster(data =cropdata, aes(x = lon, y = lat, fill=yield), inherit.aes = FALSE) +
-  scale_color_continuous(value = )
-
+# save the plot
+#ggsave(filename = "D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Map_YieldTotals_standardised.png",
+#        width = 8, height = 4)
+ggsave(filename = "D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Map_YieldTotals.png",
+       width = 8, height = 4)
