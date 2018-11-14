@@ -15,10 +15,17 @@ rm(list = ls())
 
 library(devtools)
 library(ggplot2)
+library(ggthemes)
 install_github("timnewbold/StatisticalModels")
 install_github("timnewbold/predicts-demo",subdir="predictsFunctions")
 library(predictsFunctions)
 library(StatisticalModels)
+library(reshape2)
+library(RColorBrewer)
+library(sf)
+library(raster)
+library(cowplot)
+
 
 # where are the various datasets saved?
 datadir <- "D:/BIOTA/Data"
@@ -171,8 +178,149 @@ length(unique(pred.sites.crop$Best_guess_binomial)) # 8585 species
 #                                                          #
 ############################################################
 
+# Use the EarthStat global crop yield data to estimate total yield at each site
 
 
+# where is the yield data saved
+yielddir <- "D:/BIOTA/1_Forest_Cover_Yield/1. Data/Yield"
+
+# list files in datadir
+files <- list.files(yielddir, pattern = ".csv")
+
+# read in each yield data file (17 crops) (standardise if necesssary - currently commented out)
+# then add to a new table including crop name
+
+# space to save standardised data
+all_cropdata <- NULL
+
+
+# file <- files[1]
+
+for(file in files){
+  
+  # read in the csv file
+  cropdata <- read.csv(paste0(yielddir, "/", file))
+  
+  # subset to desired columns
+  cropdata <- cropdata[, c('lon', 'lat', 'yield')]
+  
+  # standardise the yield column (if necessary)
+  #cropdata$yield_stan <- scale(cropdata$yield, center = T, scale = T)
+  
+  # add crop name to the dataframe
+  cropdata$crop <- sub("_yield.csv", "", file)
+  
+  # add this info to the all data table
+  all_cropdata <- rbind(all_cropdata, cropdata)
+  
+}
+
+
+# try to organise into a dif form with cast to see if any cells have more than one crop type
+
+# just keep the standardised yield column
+#all_cropdata2 <- all_cropdata[, c("lon", "lat", "crop", "yield_stan")] # if standardising
+#all_cropdata2 <- dcast(all_cropdata, lon +lat ~ crop, value.var = "yield_stan") # if standardising
+all_cropdata2 <- dcast(all_cropdata, lon + lat ~ crop, value.var = "yield")
+
+
+# now calculate total yield per cell
+# add a column detailing total yield per cell, sum relevent columns
+all_cropdata2$totals <- rowSums(all_cropdata2[, 3:ncol(all_cropdata2)], na.rm = TRUE)
+
+
+# save csv file of the total yield data (and/or standardised yields)
+#write.csv(all_cropdata2, paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/All_Crop_Yield_standardised.csv"))
+write.csv(all_cropdata2, paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/All_Crop_Yield.csv"), row.names = F)
+
+# plot total yield on a global map
+
+cols<-brewer.pal(4, "OrRd")
+
+ggplot(all_cropdata2, aes(x = lon, y = lat))+
+  borders("world", colour = "gray40", size = 0.3) +
+  theme_map() +
+  geom_raster(data = all_cropdata2, aes(x = lon, y = lat, fill=totals), inherit.aes = FALSE) +
+  #scale_fill_manual(values=cols) +
+  #  guides(fill=guide_legend(title="Yield \n(standardised)")) +
+  guides(fill=guide_legend(title="Yield \n(Tons per hectare)")) +
+  labs(title = paste("Total yield (17 crops), Earthstat")) +
+  theme(legend.position="bottom")+
+  theme_void()+ coord_equal()
+
+# save the plot
+#ggsave(filename = "D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Map_YieldTotals_standardised.png",
+#        width = 8, height = 4)
+ggsave(filename = "D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Map_YieldTotals.png",
+       width = 8, height = 4)
+
+
+ggplot(data = all_cropdata2, aes(x = lon, y = lat))+
+  borders("world", colour = "gray40", size = 0.3) +
+  theme_map() +
+  geom_raster(data = all_cropdata2, aes(x = lon, y = lat, fill=totals), inherit.aes = FALSE) +
+  geom_point(data = pred.sites.metrics.crop, aes( x = Longitude, y = Latitude), col = "green") +
+  #scale_fill_manual(values=cols) +
+  #  guides(fill=guide_legend(title="Yield \n(standardised)")) +
+  guides(fill=guide_legend(title="Yield \n(Tons per hectare)")) +
+  labs(title = paste("Total yield (17 crops), Earthstat")) +
+  theme(legend.position="bottom")+
+  theme_void()+ coord_equal()
+
+ggsave(file = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Overlay_yield_PREDICTS.png"))
+
+
+### figure out the yield values at the PREDICTS sites ###
+# not a clue if any of this is correct or the best way to do things!
+
+# first, convert both to spatial data objects with the same CRS
+# convert the lat/long/value data into a raster
+yield.sp <- rasterFromXYZ(all_cropdata2[, c(1,2,20)])  # add a buffer to reduce NAs?
+
+# extract yield values from the predicts points for the site level and species level datasets
+pred.sites.crop$yield.vals <- extract(yield.sp, pred.sites.crop[, c("Longitude","Latitude")])
+pred.sites.metrics.crop$yield.vals <- extract(yield.sp, pred.sites.metrics.crop[, c("Longitude","Latitude")])
+
+
+
+# normality checks on yield totals?
+# histogram of totals
+p1 <- ggplot(pred.sites.crop, aes(yield.vals)) +
+  geom_histogram()
+
+# q-q plot of totals
+p2 <- ggplot(pred.sites.crop, aes(sample = log(yield.vals))) +
+  stat_qq() + 
+  stat_qq_line()
+
+# combine into one
+plot_grid(p1, p2) # organise with cowplot function
+
+# save the plot
+#ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal_Standardised.png"))
+ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal.png"))
+
+
+# normality checks on yield totals?
+# histogram of totals
+p1 <- ggplot(pred.sites.metrics.crop, aes(yield.vals)) +
+  geom_histogram()
+
+# q-q plot of totals
+p2 <- ggplot(pred.sites.metrics.crop, aes(sample = log(yield.vals))) +
+  stat_qq() + 
+  stat_qq_line()
+
+# combine into one
+plot_grid(p1, p2) # organise with cowplot function
+
+# save the plot
+#ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal_Standardised.png"))
+ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normality_check_YieldTotal.png"))
+
+
+
+# some rows have NA in the column for total yield.  May need to remove these.
 
 
 ############################################################
@@ -206,8 +354,9 @@ length(unique(pred.sites.crop$Best_guess_binomial)) # 8585 species
 
 # dif model options (species richness, abundance, presence/absence)
 
-
 # use functions to run model selection process
+
+# which elements need to be included as fixed and random effects?
 
 # checks for overdispersion and spatial autocorrelation?
 
