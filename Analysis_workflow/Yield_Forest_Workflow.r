@@ -16,8 +16,8 @@ rm(list = ls())
 library(devtools)
 library(ggplot2)
 library(ggthemes)
-install_github("timnewbold/StatisticalModels")
-install_github("timnewbold/predicts-demo",subdir="predictsFunctions")
+#install_github("timnewbold/StatisticalModels")
+#install_github("timnewbold/predicts-demo",subdir="predictsFunctions")
 library(predictsFunctions)
 library(StatisticalModels)
 library(reshape2)
@@ -44,14 +44,14 @@ pred.data <- readRDS(paste0(datadir, "/PREDICTS_2016/database.rds")) # 3250404 r
 
 ### organise using Tim's functions ###
 
-# merge sites: this combines potential subsamples within one site
-pred.sites <- MergeSites(pred.data) # 2906994 rows
-
 # use correct sampling effort function (this replaces any with NA so the next function works)
-pred.sites <- CorrectSamplingEffort(pred.sites)
+pred.sites <- CorrectSamplingEffort(pred.data)
+
+# merge sites: this combines potential subsamples within one site
+pred.sites <- MergeSites(pred.sites) # 2906994 rows
 
 # Calculate site level metrics
-pred.sites.metrics <- SiteMetrics(pred.sites, extra.cols = "Predominant_land_use") # 22678 rows
+pred.sites.metrics <- SiteMetrics(pred.sites, extra.cols = c("Predominant_land_use", "SSB", "SSBS")) # 22678 rows
 
 
 ### so now have two datasets, pred.sites maintains species level metrics     ###
@@ -170,7 +170,9 @@ length(unique(pred.sites.crop$SSS)) # 2676 sites
 # nspecies
 length(unique(pred.sites.crop$Best_guess_binomial)) # 8585 species
 
-
+# save the two datasets
+write.csv(pred.sites.crop, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/PREDICTS_cropland_forestBiome_sp_level.csv")
+write.csv(pred.sites.metrics.crop, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/PREDICTS_cropland_forestBiome_site_level.csv")
 
 ############################################################
 #                                                          #
@@ -330,7 +332,7 @@ ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normali
 ############################################################
 
 
-
+# Monica is working on code to calculate this from the Global Land Cover dataset on forest cover.
 
 
 
@@ -341,13 +343,14 @@ ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normali
 ############################################################
 
 # include information on human population density, distance to road??
-# this was done in the land use paper.
+# these were included in the land use paper.
+# any other things to include?
 
 
 
 ############################################################
 #                                                          #
-#                    Step 6: run models                    #
+#                    Step 6: Run models                    #
 #                                                          #
 ############################################################
 
@@ -360,5 +363,109 @@ ggsave(filename = paste0("D:/BIOTA/1_Forest_Cover_Yield/Data Exploration/Normali
 
 # checks for overdispersion and spatial autocorrelation?
 
+
+#### 1. Species richness models ####
+
+
+r1 <- GLMER(modelData = pred.sites.metrics.crop,responseVar = "Species_richness",
+            fitFamily = "poisson",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)",REML = FALSE)
+
+summary(r1$model)
+
+# Try adding spatial block to account for spatial differences among sites within studies
+r2 <- GLMER(modelData = pred.sites.metrics.crop,responseVar = "Species_richness",
+            fitFamily = "poisson",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
+
+summary(r2$model)
+
+
+# checking which is better
+AIC(r1$model,r2$model)
+
+# Species richness models are often overdispersed - is this the case?
+GLMEROverdispersion(model = r2$model)
+
+# We can control for this by fitting an observation-level random effect
+r3 <- GLMER(modelData = pred.sites.metrics.crop, responseVar = "Species_richness",
+            fitFamily = "poisson",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
+
+# Is this better than the previous random-effects structure?
+AIC(r2$model,r3$model)
+
+# Has it removed the overdispersion?
+GLMEROverdispersion(model = r3$model)
+
+# Now we will run backward stepwise selection to see if land use has a significant effect
+sr1 <- GLMERSelect(modelData = pred.sites.metrics.crop, responseVar = "Species_richness",
+                   fitFamily = "poisson",fixedFactors = c("yield.vals", "biome"),
+                   randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)")
+
+
+
+#### 2. Abundance model ####
+
+
+r1 <- GLMER(modelData = pred.sites.metrics.crop,responseVar = "Total_abundance",
+            fitFamily = "gaussian",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)",REML = FALSE)
+
+summary(r1$model)
+
+# Try adding spatial block to account for spatial differences among sites within studies
+r2 <- GLMER(modelData = pred.sites.metrics.crop,responseVar = "Species_richness",
+            fitFamily = "poisson",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)+(1|SSB)",REML = FALSE)
+
+summary(r2$model)
+
+
+# checking which is better
+AIC(r1$model,r2$model)
+
+# Species richness models are often overdispersed - is this the case?
+GLMEROverdispersion(model = r2$model)
+
+# We can control for this by fitting an observation-level random effect
+r3 <- GLMER(modelData = pred.sites.metrics.crop, responseVar = "Species_richness",
+            fitFamily = "poisson",fixedStruct = "yield.vals",
+            randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)",REML = FALSE)
+
+# Is this better than the previous random-effects structure?
+AIC(r2$model,r3$model)
+
+# Has it removed the overdispersion?
+GLMEROverdispersion(model = r3$model)
+
+
+abundModelSelect <- GLMERSelect(modelData = PREDICTSSites,responseVar = "LogAbund",
+                                fitFamily = "gaussian",fixedFactors = "LandUse",
+                                fixedTerms = list(logHPD.rs=2,logDistRd.rs=2),
+                                randomStruct = "(1|SS)+(1|SSB)",verbose = TRUE)
+
+
+
+############################################################
+#                                                          #
+#                 Step 7: Plots of results                 #
+#                                                          #
+############################################################
+
+PlotGLMERContinuous(model = r3$model, data = r3$data, effects = "yield.vals", xlab = "Total crop yield",
+                    ylab = "Species Richness", line.cols = c("#79CDCD"), 
+                    outDir = "D:/BIOTA/1_Forest_Cover_Yield/Data Exploration")
+
+
+
+############################################################
+#                                                          #
+#          Step 8: Checks for overdispersion etc           #
+#                                                          #
+############################################################
+
+
+GLMEROverdispersion(model = random2)
 
 
