@@ -15,7 +15,7 @@ crop.dirs <- list.dirs(cropdir, recursive = FALSE) # 175 crops
 
 
 # loop through each crop folder and combine the production columns for each crop into one data frame.
-crop <- crop.dirs[1]
+#crop <- crop.dirs[1]
 
 # where to put the results
 all.crop <- NULL
@@ -64,7 +64,7 @@ write.csv(all.crop, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/Production/Cro
 ##### read in the harvested area info  #####
 
 # loop through each crop folder and combine the production columns for each crop into one data frame.
-crop <- crop.dirs[1]
+#crop <- crop.dirs[1]
 
 # where to put the results
 all.harv <- NULL
@@ -76,7 +76,7 @@ for(crop in crop.dirs){
   
   # read in the production file
   
-  harv.file <- list.files(crop, pattern = "HarvestedAreaHectares$")
+  harv.file <- list.files(crop, pattern = "HarvestedAreaHectares.tif$")
   
   harv.tab <- raster(paste0(crop, "/", harv.file))
   
@@ -106,7 +106,7 @@ for(crop in crop.dirs){
 }
 
 # save the file (it takes a long time to produce)
-write.csv(all.crop, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/Production/Crop_HarvestArea_fraction_175.csv", row.names = F)
+write.csv(all.harv, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/Production/Crop_HarvestArea_hectares_175.csv", row.names = F)
 
 
 ############################################################
@@ -118,13 +118,15 @@ write.csv(all.crop, file = "D:/BIOTA/1_Forest_Cover_Yield/1. Data/Production/Cro
 
 # as discussed in the group meeting, use two metrics derived from yield:
   # 1. Measure of intensity (average production per hectare)
-  # 2. Landscape state (total production per grid cell)
+  # 2. Landscape state (total production per grid cell) - this one is already an available dataset
+
+
+### calculate the production
 
 
 
 
 
-all_cropdata2 <- dcast(crop.prod, lon + lat ~ crop, value.var = "production")
 
 
 ggplot()+
