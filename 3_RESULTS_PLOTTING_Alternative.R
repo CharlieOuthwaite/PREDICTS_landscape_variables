@@ -11,6 +11,7 @@ setwd("C:/Users/charl/Dropbox/POSTDOC - BIOTA/0. PROJECTS/BIOTA")
 
 # load libraries
 library(StatisticalModels)
+library(gridExtra)
 
 # point to directories
 datadir <- '1_PREDICTS_PLUS_VARIABLES'
@@ -194,6 +195,8 @@ axis(side = 1,at = c(2,5,8),
 
 abline(h=0,col="#00000077",lty=2)
 
+title("A.", adj = 0)
+
 #legend("topright", 
 #       legend = c("Minimal Use", "Light Use", "Intense Use"),
 #       pch = c(16,17,18), bty = "n", inset=c(0,0))
@@ -211,6 +214,9 @@ axis(side = 1,at = c(2,5,8),
      padj = 0.5)
 
 abline(h=0,col="#00000077",lty=2)
+
+title("B.", adj = 0)
+
 
 #legend("topright", 
 #       legend = c("Minimal Use", "Light Use", "Intense Use"),
@@ -233,8 +239,10 @@ abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0)
-)
+       pch = c(16,17,18), bty = "n", inset=c(0,0))
+
+title("C.", adj = 0)
+
 
 dev.off()
 
@@ -534,7 +542,7 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 # SR plot = full range
-p[[7]] <- ggplot(data = result) +
+p[[6]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
@@ -551,7 +559,7 @@ p[[7]] <- ggplot(data = result) +
         aspect.ratio = 1, legend.background = element_blank()) +
   ggtitle("A.")
 
-p[[7]] <- ggplotGrob(p[[7]])
+p[[6]] <- ggplotGrob(p[[6]])
 
 
 
@@ -595,7 +603,7 @@ homogen <- as.data.frame(unscale(final.data.trans$homogen, scale = scalers[4, 2]
 
 
 # SR plot = full range
-p[[8]] <- ggplot(data = result) +
+p[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1), size = 0.1) +
@@ -612,7 +620,7 @@ p[[8]] <- ggplot(data = result) +
         aspect.ratio = 1, legend.background = element_blank()) +
   ggtitle("A.")
 
-p[[8]] <- ggplotGrob(p[[8]])
+p[[7]] <- ggplotGrob(p[[7]])
 
 
 
@@ -657,7 +665,7 @@ landcovers.5k <- as.data.frame(unscale(final.data.trans$landcovers.5k, scale = s
 
 
 # SR plot = full range
-p[[9]]<- ggplot(data = result) +
+p[[8]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   #geom_rug(data = landcovers.5k, aes(x = V1), size = 0.1) +
@@ -675,7 +683,7 @@ p[[9]]<- ggplot(data = result) +
   ggtitle("A.") +
   scale_x_continuous(breaks = c(seq(from = 0, to = 10, by = 2)))
 
-p[[9]] <- ggplotGrob(p[[9]])
+p[[8]] <- ggplotGrob(p[[8]])
 
 
 
@@ -718,7 +726,7 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 # SR plot = full range
-p[[10]] <- ggplot(data = result) +
+p[[9]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans, aes(x = fert.total, col = Use_intensity), size = 0.1) +
@@ -734,7 +742,7 @@ p[[10]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-p[[10]] <- ggplotGrob(p[[10]])
+p[[9]] <- ggplotGrob(p[[9]])
 
 
 
@@ -779,7 +787,7 @@ percNH <- as.data.frame(unscale(final.data.trans$percNH, scale = scalers[5, 2], 
 
 
 # SR plot = full range
-p[[11]] <- ggplot(data = result) +
+p[[10]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1), size = 0.1) +
@@ -795,7 +803,7 @@ p[[11]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-p[[11]] <- ggplotGrob(p[[11]])
+p[[10]] <- ggplotGrob(p[[10]])
 
 
 
@@ -835,7 +843,7 @@ result$factor <- pred_tab[, fac]
 
 
 # SR plot = full range
-p[[12]]<- ggplot(data = result) +
+p[[11]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans, aes(x = Hansen_mindist_log, col = Tropical), size = 0.1) +
@@ -851,24 +859,21 @@ p[[12]]<- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-p[[12]] <- ggplotGrob(p[[12]])
+p[[11]] <- ggplotGrob(p[[11]])
 
 
 # organise species richness plots
 
-library(gridExtra)
-
-
 lay <-rbind(c(1,2),
             c(3,4),
-            c(5,NA),
+            c(5,6),
             c(7,8),
             c(9,10),
-            c(11,12))
+            c(11,NA))
 
-plots <- marrangeGrob(grobs = p[c(1:5, 7:12)], npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
+plots <- marrangeGrob(grobs = p, npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
 
-ggsave(filename = paste0(outdir, "/SR_cont_plots.pdf"), plots, height = 16, width = 8)
+ggsave(filename = paste0(outdir, "/SR_cont_plots.pdf"), plots, height = 20, width = 12)
 
 
 
@@ -1201,7 +1206,7 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 # SR plot = full range
-q[[7]] <- ggplot(data = result) +
+q[[6]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.abun, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
@@ -1218,7 +1223,7 @@ q[[7]] <- ggplot(data = result) +
         aspect.ratio = 1, legend.background = element_blank()) +
   ggtitle("B.")
 
-q[[7]] <- ggplotGrob(q[[7]])
+q[[6]] <- ggplotGrob(q[[6]])
 
 
 
@@ -1262,7 +1267,7 @@ percNH <- as.data.frame(unscale(final.data.trans$percNH, scale = scalers[5, 2], 
 
 
 # SR plot = full range
-q[[8]] <- ggplot(data = result) +
+q[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1), size = 0.1) +
@@ -1279,7 +1284,7 @@ q[[8]] <- ggplot(data = result) +
         aspect.ratio = 1, legend.background = element_blank()) +
   ggtitle("B.")
 
-q[[8]] <- ggplotGrob(q[[8]])
+q[[7]] <- ggplotGrob(q[[7]])
 
 
 
@@ -1321,7 +1326,7 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 # SR plot = full range
-q[[9]] <- ggplot(data = result) +
+q[[8]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.abun, aes(x = fert.total, col = Use_intensity), size = 0.1) +
@@ -1337,7 +1342,7 @@ q[[9]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-q[[9]] <- ggplotGrob(q[[9]])
+q[[8]] <- ggplotGrob(q[[8]])
 
 
 
@@ -1382,7 +1387,7 @@ percNH <- as.data.frame(unscale(final.data.abun$percNH, scale = scalers[5, 2], c
 
 
 # SR plot = full range
-q[[10]] <- ggplot(data = result) +
+q[[9]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1), size = 0.1) +
@@ -1398,7 +1403,7 @@ q[[10]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-q[[10]] <- ggplotGrob(q[[10]])
+q[[9]] <- ggplotGrob(q[[9]])
 
 
 
@@ -1438,7 +1443,7 @@ result$factor <- pred_tab[, fac]
 
 
 # SR plot = full range
-q[[11]]<- ggplot(data = result) +
+q[[10]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans, aes(x = Hansen_mindist_log, col = Tropical), size = 0.1) +
@@ -1454,21 +1459,20 @@ q[[11]]<- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) 
 
-q[[11]] <- ggplotGrob(q[[11]])
+q[[10]] <- ggplotGrob(q[[10]])
 
 
 # organise species richness plots
 
 lay <-rbind(c(1,2),
             c(3,4),
-            c(5,NA),
+            c(5,6),
             c(7,8),
-            c(9,10),
-            c(11,NA))
+            c(9,10))
 
-plots <- marrangeGrob(grobs = q[c(1:5, 7:11)], npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
+plots <- marrangeGrob(grobs = q, npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
 
-ggsave(filename = paste0(outdir, "/AB_cont_plots.pdf"), plots, height = 16, width = 8)
+ggsave(filename = paste0(outdir, "/AB_cont_plots.pdf"), plots, height = 20, width = 12)
 
 
 
@@ -1512,8 +1516,6 @@ dev.off()
 
 # list to save plots in
 r <- list()
-
-
 
 ### Distance to forest ###
 
@@ -1753,7 +1755,7 @@ percNH <- as.data.frame(unscale(final.data.rcar$percNH, scale = scalers[5, 2], c
 
 
 # SR plot = full range
-r[[6]] <- ggplot(data = result) +
+r[[5]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1), size = 0.1) +
@@ -1770,7 +1772,7 @@ r[[6]] <- ggplot(data = result) +
         aspect.ratio = 1) +
   ggtitle("C.")
 
-r[[6]] <- ggplotGrob(r[[6]])
+r[[5]] <- ggplotGrob(r[[5]])
 
 
 
@@ -1812,7 +1814,7 @@ result$factor <- pred_tab[, fac]
 homogen <- as.data.frame(unscale(final.data.rcar$homogen, scale = scalers[4, 2], centre = scalers[4, 3], log = F))
 
 
-r[[7]] <- ggplot(data = result) +
+r[[6]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1), size = 0.1) +
@@ -1829,7 +1831,7 @@ r[[7]] <- ggplot(data = result) +
         aspect.ratio = 1, legend.background = element_blank()) +
   ggtitle("C.")
 
-r[[7]] <- ggplotGrob(r[[7]])
+r[[6]] <- ggplotGrob(r[[6]])
 
 
 
@@ -1873,7 +1875,7 @@ result$factor <- pred_tab[, fac]
 
 
 # SR plot = full range
-r[[8]] <- ggplot(data = result) +
+r[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.rcar, aes(x = Hansen_mindist), size = 0.1) +
@@ -1889,7 +1891,7 @@ r[[8]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-r[[8]] <- ggplotGrob(r[[8]])
+r[[7]] <- ggplotGrob(r[[7]])
 
 
 
@@ -1931,7 +1933,7 @@ result$factor <- pred_tab[, fac]
 
 
 # SR plot = full range
-r[[9]]<- ggplot(data = result) +
+r[[8]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   #geom_rug(data = landcovers.5k, aes(x = V1)) +
@@ -1947,7 +1949,7 @@ r[[9]]<- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-r[[9]] <- ggplotGrob(r[[9]])
+r[[8]] <- ggplotGrob(r[[8]])
 
 
 
@@ -1995,7 +1997,7 @@ homogen <- as.data.frame(unscale(final.data.rcar$homogen, scale = scalers[4, 2],
 
 
 # SR plot = full range
-r[[10]] <- ggplot(data = result) +
+r[[9]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1), size = 0.1) +
@@ -2011,7 +2013,7 @@ r[[10]] <- ggplot(data = result) +
         legend.text = element_text(size = 6),
         aspect.ratio = 1) 
 
-r[[10]] <- ggplotGrob(r[[10]])
+r[[9]] <- ggplotGrob(r[[9]])
 
 
 
@@ -2019,15 +2021,13 @@ r[[10]] <- ggplotGrob(r[[10]])
 
 lay <-rbind(c(1,2),
             c(3,4),
-            c(NA,6),
+            c(5,6),
             c(7,8),
-            c(9,10))
+            c(9,NA))
 
-plots <- marrangeGrob(grobs = r[c(1:4, 6:10)], npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
+plots <- marrangeGrob(grobs = r, npages = 2, ncol = 2, nrow = 4,  layout_matrix =lay, top = "")
 
-ggsave(filename = paste0(outdir, "/RCAR_cont_plots.pdf"), plots, height = 16, width = 8)
-
-
+ggsave(filename = paste0(outdir, "/RCAR_cont_plots.pdf"), plots, height = 20, width = 12)
 
 
 
@@ -2049,7 +2049,7 @@ ggsave(filename = paste0(outdir, "/Paper_dist_plots.pdf"), dist_plots, height = 
 
 # percentage natural habitat (SR, Abun interaction, RCAR interaction)
 
-percNH_plots <- marrangeGrob(grobs = list(p[[2]], r[[6]], q[[8]]), npages = 1, ncol = 2, nrow = 2, top = "")
+percNH_plots <- marrangeGrob(grobs = list(p[[2]], r[[5]], q[[7]]), npages = 1, ncol = 2, nrow = 2, top = "")
 
 
 ggsave(filename = paste0(outdir, "/Paper_percNH_plots.pdf"), percNH_plots, height = 8, width = 8)
@@ -2057,147 +2057,27 @@ ggsave(filename = paste0(outdir, "/Paper_percNH_plots.pdf"), percNH_plots, heigh
 
 # homogen (SR interaction, Abun, RCAR interaction)
 
-homogen_plots <- marrangeGrob(grobs = list(p[[8]], r[[7]], q[[5]]), npages = 1, ncol = 2, nrow = 2, top = "")
+homogen_plots <- marrangeGrob(grobs = list(p[[7]], r[[6]], q[[5]]), npages = 1, ncol = 2, nrow = 2, top = "")
 
 ggsave(filename = paste0(outdir, "/Paper_homogen_plots.pdf"), homogen_plots, height = 8, width = 8)
 
 
 # landcovers (SR interaction, Abun)
 
-landcovers_plots <- marrangeGrob(grobs = list(p[[9]], q[[4]]), npages = 1, ncol = 2, nrow = 1, top = "")
+landcovers_plots <- marrangeGrob(grobs = list(p[[8]], q[[4]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
 ggsave(filename = paste0(outdir, "/Paper_landcovers_plots.pdf"), landcovers_plots, height = 4, width = 8)
 
 
 # fertiliser (SR interaction, Abun interaction)
 
-fert_plots <- marrangeGrob(grobs = list(p[[7]], q[[7]]), npages = 1, ncol = 2, nrow = 1, top = "")
+fert_plots <- marrangeGrob(grobs = list(p[[6]], q[[6]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
 ggsave(filename = paste0(outdir, "/Paper_fert_plots.pdf"), fert_plots, height = 4, width = 8)
 
 # tropical distance interaction
 
-trop_plots <- marrangeGrob(grobs = list(p[[12]], q[[11]]), npages = 1, ncol = 2, nrow = 1, top = "")
+trop_plots <- marrangeGrob(grobs = list(p[[11]], q[[10]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
 ggsave(filename = paste0(outdir, "/Paper_tropical_plots.pdf"), trop_plots, height = 4, width = 8)
-
-
-# fertiliser full range
-
-### Fertilier, by land use ###
-
-# in this instance, predicting fertiliser vals 
-from = 0
-to = 800000
-vals <- seq(from = from, to = to, length.out = to/30)
-variable <- 'fert.total_log'
-fac <- 'Predominant_land_use'
-n <- 3
-logval = TRUE
-
-# organise the data
-pred_tab <- sort_data(modout = srmod,
-                      moddata = final.data.trans,
-                      scalers = scalers,
-                      from = from, 
-                      to = to,
-                      vals = vals, 
-                      variable = variable,
-                      fac = fac, 
-                      n = n,
-                      logval = logval)
-
-# predict the result
-result1 <- PredictGLMER(model = srmod$model, data = pred_tab[pred_tab$Predominant_land_use == "Primary vegetation",], se.fit = TRUE, seMultiplier = 1.96)
-result2 <- PredictGLMER(model = srmod$model, data = pred_tab[pred_tab$Predominant_land_use == "Secondary vegetation",], se.fit = TRUE, seMultiplier = 1.96)
-result3 <- PredictGLMER(model = srmod$model, data = pred_tab[pred_tab$Predominant_land_use == "Cropland",], se.fit = TRUE, seMultiplier = 1.96)
-
-result <- PredictGLMER(model = srmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
-
-
-# transform the results
-result <- exp(result)
-
-## organise data for plotting ##
-
-# add the new vals
-result$vals <- rep(vals, n)
-result$factor <- pred_tab[, fac]
-
-# SR plot = full range
-p[[13]] <- ggplot(data = result) +
-  geom_line(aes(x = vals, y = y, col = factor)) +
-  geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = final.data.trans, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,30)) +
-  xlim(c(0, 800000)) +
-  xlab("Total fertiliser application (Kgs)") +
-  ylab("Species Richness") +
-  scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"))+
-  scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("A.")
-
-p[[7]] <- ggplotGrob(p[[7]])
-
-
-
-### Fertilier, by land use ###
-
-# in this instance, predicting fertiliser vals 
-from = 0
-to = 3000
-vals <- seq(from = from, to = to, length.out = 1000)
-variable <- 'fert.total_log'
-fac <- 'Predominant_land_use'
-n <- 3
-logval = TRUE
-
-# organise the data
-pred_tab <- sort_data(modout = abmod,
-                      moddata = final.data.trans,
-                      scalers = scalers,
-                      from = from, 
-                      to = to,
-                      vals = vals, 
-                      variable = variable,
-                      fac = fac, 
-                      n = n,
-                      logval = logval)
-
-# predict the result
-result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
-
-# transform the results
-result <- exp(result)
-
-## organise data for plotting ##
-
-# add the new vals
-result$vals <- rep(vals, n)
-result$factor <- pred_tab[, fac]
-
-# SR plot = full range
-q[[7]] <- ggplot(data = result) +
-  geom_line(aes(x = vals, y = y, col = factor)) +
-  geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = final.data.abun, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,300)) +
-  xlim(c(0, 3000)) +
-  xlab("Total fertiliser application (Kgs)") +
-  ylab("Total Abundance") +
-  scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"))+
-  scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        legend.position = "none", legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("B.")
-
-q[[7]] <- ggplotGrob(q[[7]])
 
