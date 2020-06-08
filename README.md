@@ -1,9 +1,19 @@
-# BIOTA
+# PREDICTS_landscape variables
 
 ## Repository maintained by Charlie Outhwaite
 
-Code associated with my BIOTA project work.
+Code associated with the paper entitiled: "Availability and proximity of natural habitat drives land-use responses of cropland biodiversity in forest biomes"
 
-BIOTA is a NERC funded project led by Tim Newbold and Carole Dalin at UCL. The project focusses on the interactions between biodiversity and agriculture at a global scale. 
+Note, this paper has been submitted to PLOS Biology. 
 
-This is a three year project which started in October 2018.
+
+
+This paper looks at the response of different forms of biodiversity to both landscape and local variables. 
+
+
+The starting dataset is available for download from figshare (add link).
+
+Then, starting from script 1_PREDICTS_DATA it is possible to recreate all analyses as well as reproducing the plots presented in the paper. 
+
+
+
