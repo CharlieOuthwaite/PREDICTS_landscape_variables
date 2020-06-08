@@ -17,3 +17,9 @@
 *README.html
 *README_cache/
 #*README_files/
+# ignore folders created by scripts
+0_DATA/
+1_PREDICTS_PLUS_VARIABLES/
+2_MODEL_SELECTION/
+3_PLOTTING/
+4_STATS_PROJECTIONS/
