@@ -7,7 +7,6 @@
 # writing a script to predict and then plot values from models
 
 rm(list = ls())
-setwd("C:/Users/charl/Dropbox/POSTDOC - BIOTA/0. PROJECTS/BIOTA")
 
 # load libraries
 library(StatisticalModels)
@@ -600,13 +599,13 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 homogen <- as.data.frame(unscale(final.data.trans$homogen, scale = scalers[4, 2], centre = scalers[4, 3], log = F))
-
+homogen$Predominant_land_use <- final.data.trans$Predominant_land_use
 
 # SR plot = full range
 p[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = homogen, aes(x = V1), size = 0.1) +
+  geom_rug(data = homogen, aes(x = V1, col = Predominant_land_use), size = 0.1) +
   ylim(c(0,30)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
@@ -784,13 +783,13 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 percNH <- as.data.frame(unscale(final.data.trans$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
-
+percNH$Use_intensity <- final.data.trans$Use_intensity
 
 # SR plot = full range
 p[[10]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = percNH, aes(x = V1), size = 0.1) +
+  geom_rug(data = percNH, aes(x = V1, col = Use_intensity), size = 0.1) +
   ylim(c(0,30)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
@@ -846,7 +845,7 @@ result$factor <- pred_tab[, fac]
 p[[11]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = final.data.trans, aes(x = Hansen_mindist_log, col = Tropical), size = 0.1) +
+  geom_rug(data = final.data.trans, aes(x = Hansen_mindist, col = Tropical), size = 0.1) +
   ylim(c(0,30)) +
   xlim(c(0, 20)) +
   xlab("Distance to forest (Km)") +
@@ -950,7 +949,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1002,7 +1001,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 percNH <- as.data.frame(unscale(final.data.abun$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
@@ -1051,7 +1050,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 # SR plot = full range
 q[[3]]<- ggplot(data = result) +
@@ -1097,7 +1096,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 
 # SR plot = full range
@@ -1146,7 +1145,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 homogen <- as.data.frame(unscale(final.data.abun$homogen, scale = scalers[4, 2], centre = scalers[4, 3], log = F))
 
@@ -1197,7 +1196,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1255,7 +1254,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1263,14 +1262,14 @@ result <- exp(result)
 result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
-percNH <- as.data.frame(unscale(final.data.trans$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
-
+percNH <- as.data.frame(unscale(final.data.abun$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
+percNH$Predominant_land_use <- final.data.abun$Predominant_land_use
 
 # SR plot = full range
 q[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = percNH, aes(x = V1), size = 0.1) +
+  geom_rug(data = percNH, aes(x = V1, col = Predominant_land_use), size = 0.1) +
   ylim(c(0,300)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
@@ -1317,7 +1316,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1375,7 +1374,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1384,13 +1383,13 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 percNH <- as.data.frame(unscale(final.data.abun$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
-
+percNH$Use_intensity <- final.data.abun$Use_intensity
 
 # SR plot = full range
 q[[9]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = percNH, aes(x = V1), size = 0.1) +
+  geom_rug(data = percNH, aes(x = V1, col = Use_intensity), size = 0.1) +
   ylim(c(0,300)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
@@ -1433,7 +1432,7 @@ pred_tab <- sort_data(modout = abmod,
 result <- PredictGLMER(model = abmod$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
 
 # transform the results
-result <- exp(result)
+result <- exp(result)-1
 
 ## organise data for plotting ##
 
@@ -1446,7 +1445,7 @@ result$factor <- pred_tab[, fac]
 q[[10]]<- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = final.data.trans, aes(x = Hansen_mindist_log, col = Tropical), size = 0.1) +
+  geom_rug(data = final.data.trans, aes(x = Hansen_mindist, col = Tropical), size = 0.1) +
   ylim(c(0,300)) +
   xlim(c(0, 20)) +
   xlab("Distance to forest (Km)") +
@@ -1752,13 +1751,13 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 percNH <- as.data.frame(unscale(final.data.rcar$percNH, scale = scalers[5, 2], centre = scalers[5, 3], log = F))
-
+percNH$Predominant_land_use <- final.data.rcar$Predominant_land_use
 
 # SR plot = full range
 r[[5]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = percNH, aes(x = V1), size = 0.1) +
+  geom_rug(data = percNH, aes(x = V1, col = Predominant_land_use), size = 0.1) +
   ylim(c(15000, 4000000)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
@@ -1812,12 +1811,12 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 homogen <- as.data.frame(unscale(final.data.rcar$homogen, scale = scalers[4, 2], centre = scalers[4, 3], log = F))
-
+homogen$Predominant_land_use <- final.data.rcar$Predominant_land_use
 
 r[[6]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = homogen, aes(x = V1), size = 0.1) +
+  geom_rug(data = homogen, aes(x = V1, col = Predominant_land_use), size = 0.1) +
   ylim(c(15000, 4000000)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
@@ -1878,7 +1877,7 @@ result$factor <- pred_tab[, fac]
 r[[7]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = final.data.rcar, aes(x = Hansen_mindist), size = 0.1) +
+  geom_rug(data = final.data.rcar, aes(x = Hansen_mindist, col = Use_intensity), size = 0.1) +
   ylim(c(15000, 4000000)) +
   xlim(c(0, 20)) +
   xlab("Distance to forest (Km)") +
@@ -1994,13 +1993,13 @@ result$vals <- rep(vals, n)
 result$factor <- pred_tab[, fac]
 
 homogen <- as.data.frame(unscale(final.data.rcar$homogen, scale = scalers[4, 2], centre = scalers[4, 3], log = F))
-
+homogen$Use_intensity <- final.data.rcar$Use_intensity
 
 # SR plot = full range
 r[[9]] <- ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
-  geom_rug(data = homogen, aes(x = V1), size = 0.1) +
+  geom_rug(data = homogen, aes(x = V1, col = Use_intensity), size = 0.1) +
   ylim(c(15000, 4000000)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
