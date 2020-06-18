@@ -269,13 +269,13 @@ srr2 <- R2GLMER(srmod$model) # [1] conditional, [2] marginal
 abr2 <- R2GLMER(abmod$model)
 rcarr2 <- R2GLMER(rcarmod$model)
 
-# Look at the percentage of variance unexplained by the random effects, but
+# Look at the proportion of variance unexplained by the random effects, but
 # explained by the fixed effects...  Marginal/(1 - (Conditional - Marginal))
 
 
-srper <- srr2[[2]]/(1-(srr2[[1]] - srr2[[2]]))*100
-abper <- abr2[[2]]/(1-(abr2[[1]] - abr2[[2]]))*100
-rcarper <- rcarr2[[2]]/(1-(rcarr2[[1]] - rcarr2[[2]]))*100
+srper <- srr2[[2]]/(1-(srr2[[1]] - srr2[[2]]))
+abper <- abr2[[2]]/(1-(abr2[[1]] - abr2[[2]]))
+rcarper <- rcarr2[[2]]/(1-(rcarr2[[1]] - rcarr2[[2]]))
 
 
 # organise values in a table
@@ -288,7 +288,7 @@ rcarres  <- unlist(c(rcarr2[1], rcarr2[2], rcarper))
 
 result <- rbind(srres, abres, rcarres)
 
-colnames(result)[3] <- "% unexplained variance explained by fixed effects"
+colnames(result)[3] <- "proportion unexplained variance explained by fixed effects"
 
 rownames(result) <- c("SR", "Abun", "RCAR")
 
@@ -318,6 +318,7 @@ tab_model(rcarmod$model, transform = NULL, file = paste0(outdir, "/RCAR_output_t
 
 ## 1. Checking the fitted vs residuals relationship
 p1 <- plot(srmod$model)
+# this kind of check is not informative for model with poisson error. Not included in supplementary.
 
 
 ## 2. Normality of Residuals
@@ -359,11 +360,11 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 
-plot_grid(p1,p2,p3,
-          labels = c("A.", "B.", "C."))
+plot_grid(p2,p3,
+          labels = c("A.", "B."))
 
 
-ggsave(file = paste0(outdir, "/SR_model_checks_plots.pdf"), height = 9, width = 9)
+ggsave(file = paste0(outdir, "/SR_model_checks_plots.pdf"), height = 4, width = 8)
 
 
 
