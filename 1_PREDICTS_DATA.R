@@ -291,12 +291,18 @@ sites.buffer.3k <- buffer(sites.sub_xy, width = 3000, dissolve = FALSE)
 sites.buffer.5k <- buffer(sites.sub_xy, width = 5000, dissolve = FALSE)
 
 
+mapview::mapview(sites.sub_xy)
+mapview::mapview(sites.buffer.5k)
+
+
 # extract the raster values for the buffer sites
-landcovers_extract.100 <- extract(landuse, sites.buffer.100, df = TRUE)
+landcovers_extract.100 <- extract(landuse,  sites.buffer.100, df = TRUE)
 landcovers_extract.500 <- extract(landuse, sites.buffer.500, df = TRUE)
 landcovers_extract.1k <- extract(landuse, sites.buffer.1k, df = TRUE)
 landcovers_extract.3k <- extract(landuse, sites.buffer.3k, df = TRUE)
 landcovers_extract.5k <- extract(landuse, sites.buffer.5k, df = TRUE)
+
+
 
 
 # Function to look at the number of unique landcovers for each ID. 
