@@ -171,10 +171,10 @@ resultr.lower <- ((apply(X = resultr, MARGIN = 1, FUN = quantile,probs = 0.025))
 # create the plots
 
 
-pdf(file = paste0(outdir, "/LU_UI_plots.pdf"))
+pdf(file = paste0(outdir, "/FIG2_Paper_LU_UI_plots.pdf"))
     
 
-par(mfrow = c(2,2), mar = c(5, 4, 1, 2))
+par(mfrow = c(2,2), mar = c(6, 5, 2, 3))
 
 
 ## SR
@@ -194,7 +194,7 @@ axis(side = 1,at = c(2,5,8),
 
 abline(h=0,col="#00000077",lty=2)
 
-title("A.", adj = 0)
+title("a.", adj = 0, line = 1)
 
 #legend("topright", 
 #       legend = c("Minimal Use", "Light Use", "Intense Use"),
@@ -214,7 +214,7 @@ axis(side = 1,at = c(2,5,8),
 
 abline(h=0,col="#00000077",lty=2)
 
-title("B.", adj = 0)
+title("b.", adj = 0, line = 1)
 
 
 #legend("topright", 
@@ -240,7 +240,7 @@ legend("topleft",
        legend = c("Minimal Use", "Light Use", "Intense Use"),
        pch = c(16,17,18), bty = "n", inset=c(0,0))
 
-title("C.", adj = 0)
+title("c.", adj = 0, line = 1)
 
 
 dev.off()
@@ -302,7 +302,7 @@ p[[1]] <- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("A.")
+  ggtitle("a.")
   
 
 p[[1]] <- ggplotGrob(p[[1]])
@@ -355,7 +355,7 @@ p[[2]]<- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("A.")
+  ggtitle("a.")
 
 p[[2]] <- ggplotGrob(p[[2]])
 
@@ -556,7 +556,7 @@ p[[6]] <- ggplot(data = result) +
         legend.position = c(0.2,0.85), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("A.")
+  ggtitle("a.")
 
 p[[6]] <- ggplotGrob(p[[6]])
 
@@ -617,7 +617,7 @@ p[[7]] <- ggplot(data = result) +
         legend.position = c(0.2,0.85), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("A.")
+  ggtitle("a.")
 
 p[[7]] <- ggplotGrob(p[[7]])
 
@@ -679,7 +679,7 @@ p[[8]]<- ggplot(data = result) +
         legend.position = c(0.2,0.85), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("A.") +
+  ggtitle("a.") +
   scale_x_continuous(breaks = c(seq(from = 0, to = 10, by = 2)))
 
 p[[8]] <- ggplotGrob(p[[8]])
@@ -967,7 +967,7 @@ q[[1]] <- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("B.")
+  ggtitle("b.")
 
 q[[1]] <- ggplotGrob(q[[1]])
 
@@ -1111,7 +1111,7 @@ q[[4]]<- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("B.") +
+  ggtitle("b.") +
   scale_x_continuous(breaks = c(seq(from = 0, to = 10, by = 2)))
 
 
@@ -1162,7 +1162,7 @@ q[[5]]<- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("B.")
+  ggtitle("b.")
 
 q[[5]] <- ggplotGrob(q[[5]])
 
@@ -1220,7 +1220,7 @@ q[[6]] <- ggplot(data = result) +
         legend.position = "none", legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("B.")
+  ggtitle("b.")
 
 q[[6]] <- ggplotGrob(q[[6]])
 
@@ -1281,7 +1281,7 @@ q[[7]] <- ggplot(data = result) +
         legend.position = c(0.2,0.8), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("B.")
+  ggtitle("b.")
 
 q[[7]] <- ggplotGrob(q[[7]])
 
@@ -1559,7 +1559,7 @@ r[[1]] <- ggplot(data = result) +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
         aspect.ratio = 1) +
-  ggtitle("B.")
+  ggtitle("b.")
 
 r[[1]] <- ggplotGrob(r[[1]])
 
@@ -1769,7 +1769,7 @@ r[[5]] <- ggplot(data = result) +
         legend.position = c(0.2,0.8), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1) +
-  ggtitle("C.")
+  ggtitle("c.")
 
 r[[5]] <- ggplotGrob(r[[5]])
 
@@ -1828,7 +1828,7 @@ r[[6]] <- ggplot(data = result) +
         legend.position = c(0.2,0.85), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) +
-  ggtitle("C.")
+  ggtitle("c.")
 
 r[[6]] <- ggplotGrob(r[[6]])
 
@@ -2043,7 +2043,7 @@ ggsave(filename = paste0(outdir, "/RCAR_cont_plots.pdf"), plots, height = 20, wi
 
 dist_plots <- marrangeGrob(grobs = list(p[[1]], r[[1]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
-ggsave(filename = paste0(outdir, "/Paper_dist_plots.pdf"), dist_plots, height = 4, width = 8)
+ggsave(filename = paste0(outdir, "/FIG3_Paper_dist_plots.pdf"), dist_plots, height = 4, width = 8)
 
 
 # percentage natural habitat (SR, Abun interaction, RCAR interaction)
@@ -2051,28 +2051,28 @@ ggsave(filename = paste0(outdir, "/Paper_dist_plots.pdf"), dist_plots, height = 
 percNH_plots <- marrangeGrob(grobs = list(p[[2]], r[[5]], q[[7]]), npages = 1, ncol = 2, nrow = 2, top = "")
 
 
-ggsave(filename = paste0(outdir, "/Paper_percNH_plots.pdf"), percNH_plots, height = 8, width = 8)
+ggsave(filename = paste0(outdir, "/FIG4_Paper_percNH_plots.pdf"), percNH_plots, height = 8, width = 8)
 
 
 # homogen (SR interaction, Abun, RCAR interaction)
 
 homogen_plots <- marrangeGrob(grobs = list(p[[7]], r[[6]], q[[5]]), npages = 1, ncol = 2, nrow = 2, top = "")
 
-ggsave(filename = paste0(outdir, "/Paper_homogen_plots.pdf"), homogen_plots, height = 8, width = 8)
+ggsave(filename = paste0(outdir, "/FIG5_Paper_homogen_plots.pdf"), homogen_plots, height = 8, width = 8)
 
 
 # landcovers (SR interaction, Abun)
 
 landcovers_plots <- marrangeGrob(grobs = list(p[[8]], q[[4]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
-ggsave(filename = paste0(outdir, "/Paper_landcovers_plots.pdf"), landcovers_plots, height = 4, width = 8)
+ggsave(filename = paste0(outdir, "/FIG6_Paper_landcovers_plots.pdf"), landcovers_plots, height = 4, width = 8)
 
 
 # fertiliser (SR interaction, Abun interaction)
 
 fert_plots <- marrangeGrob(grobs = list(p[[6]], q[[6]]), npages = 1, ncol = 2, nrow = 1, top = "")
 
-ggsave(filename = paste0(outdir, "/Paper_fert_plots.pdf"), fert_plots, height = 4, width = 8)
+ggsave(filename = paste0(outdir, "/FIG7_Paper_fert_plots.pdf"), fert_plots, height = 4, width = 8)
 
 # tropical distance interaction
 
