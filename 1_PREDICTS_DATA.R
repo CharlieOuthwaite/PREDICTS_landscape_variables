@@ -684,7 +684,7 @@ nrow(final.data.rcar) # 5742 sites
 #                                                          #
 ##%######################################################%##
 
-
+# load(file = paste0(outdir, "/PREDICTS_dataset_inc_variables_TRANS.rdata"))
 
 # extract the PREDICTS points
 plot_data <- final.data.trans[, c("SS", "SSBS", "Longitude", "Latitude")]
@@ -741,8 +741,9 @@ ggplot()+
   ylab("") +
   scale_size_continuous(range = c(0.2, 5), breaks = c(1, 10, 50, 100, 200)) +
   guides(fill=guide_legend(nrow=7,byrow=TRUE), size = guide_legend(nrow = 7, byrow = T)) +
-  scale_fill_manual(breaks = ecobio$BIOME, values = colorblind_pal()(n + 1)[-1])
-
+  scale_fill_manual(breaks = ecobio$BIOME, values = colorblind_pal()(n + 1)[-1]) + 
+  geom_hline(aes(yintercept = -23.44), linetype = "dashed") +
+  geom_hline(aes(yintercept = 23.44), linetype = "dashed")
 
 ggsave(filename = paste0(outdir, "/MAP_Predicts_points_biome.pdf"),
        plot = last_plot(),
