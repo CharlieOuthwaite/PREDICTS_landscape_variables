@@ -4,6 +4,8 @@
 #                                                          #
 ##%######################################################%##
 
+# 1. Abundance models
+
 # This script carries out the model selection process using the dataset generated
 # in the previous script. Models are run for 3 biodiversity metrics. 
 
@@ -17,6 +19,8 @@ library(StatisticalModels)
 library(roquefort)
 library(cowplot)
 library(gridGraphics)
+library(sjPlot)
+library(lme4)
 
 
 # directories
@@ -26,67 +30,43 @@ outdir <- "2_MODEL_SELECTION"
 # read in the PREDICTS datasets with landscape variables
 
 load(paste0(datadir, "/PREDICTS_dataset_inc_variables_TRANS.rdata"))
-load(paste0(datadir, "/PREDICTS_abun_subset.rdata"))
-load(paste0(datadir, "/PREDICTS_rcar_subset.rdata"))
+final.data.trans <- droplevels(final.data.trans)
+#load(paste0(datadir, "/PREDICTS_abun_subset.rdata"))
+#load(paste0(datadir, "/PREDICTS_rcar_subset.rdata"))
 
 
+# Split the dataset based on realm
 
-#### Run the model selection process including all landscape variables ####
+final.data.trans_trop <- final.data.trans[final.data.trans$Tropical == "Tropical", ]
+nrow(final.data.trans_trop) # 3719
+
+final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperate", ]
+nrow(final.data.trans_temp) # 6674
 
 
 ##%######################################################%##
 #                                                          #
-####                1. Species richness                 ####
+####              Model selection process               ####
+####         including all landscape variables          ####
 #                                                          #
 ##%######################################################%##
 
+#### 1. Tropical subset ####
 
-#### 1. Species richness models ####
+# separate out the data where abundance column is not NA
+mod_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ] # 3314 rows
+
+# log the abundance values
+mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
+
+# check for NAs in other columns
+summary(is.na(mod_dat))
 
 # run the model selection process
-
-system.time({sr1 <- GLMERSelect(modelData = final.data.trans, 
-                                  responseVar = "Species_richness",
-                                  fitFamily = "poisson", 
-                                  fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity", "Tropical"),
-                                  fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
-                                  randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)", 
-                                  fixedInteractions = c("Predominant_land_use:fert.total_log", 
-                                                        "Predominant_land_use:Hansen_mindist_log",
-                                                        "Predominant_land_use:landcovers.5k", 
-                                                        "Predominant_land_use:homogen", 
-                                                        "Predominant_land_use:percNH",
-                                                        "Use_intensity:fert.total_log", 
-                                                        "Use_intensity:Hansen_mindist_log",
-                                                        "Use_intensity:landcovers.5k",
-                                                        "Use_intensity:homogen",
-                                                        "Use_intensity:percNH",
-                                                        "Predominant_land_use:Use_intensity",
-                                                        "Tropical:Hansen_mindist_log"), verbose = F)}) 
-# save the output
-save(sr1, file = paste0(outdir, "/SPECIESRICHNESS_Model_selection.rdata"))
-
-# take a look at the model output
-summary(sr1$model)
-
-# extract the stats produced as part of the model selection process
-sr1stats <- as.data.frame(sr1$stats)
-
-# save these
-write.csv(sr1stats, file = paste0(outdir, "/sr_stats.csv"), row.names = F)
-
-
-##%######################################################%##
-#                                                          #
-####                    2. Abundance                    ####
-#                                                          #
-##%######################################################%##
-
-
-system.time({ab1 <- GLMERSelect(modelData = final.data.abun, 
+system.time({ab_trop <- GLMERSelect(modelData = mod_dat, 
                                   responseVar = "logAbun",
                                   fitFamily = "gaussian", 
-                                  fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity", "Tropical"),
+                                  fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                   fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                   randomStruct = "(1|SS)+(1|SSB)", 
                                   fixedInteractions = c("Predominant_land_use:fert.total_log", 
@@ -99,32 +79,38 @@ system.time({ab1 <- GLMERSelect(modelData = final.data.abun,
                                                         "Use_intensity:landcovers.5k", 
                                                         "Use_intensity:homogen",
                                                         "Use_intensity:percNH",
-                                                        "Predominant_land_use:Use_intensity", 
-                                                        "Tropical:Hansen_mindist_log"), verbose = F)})
+                                                        "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
-summary(ab1$model)
+summary(ab_trop$model)
 
 # save the output
-save(ab1, file = paste0(outdir, "/ABUNDANCE_Model_Selection.rdata"))
+save(ab_trop, file = paste0(outdir, "/ABUNDANCE_Tropical_Model_Selection.rdata"))
 
 # extract the stats produced as part of the model selection process
-ab1stats <- as.data.frame(ab1$stats)
+ab_trop_stats <- as.data.frame(ab_trop$stats)
 
 # save these
-write.csv(ab1stats, file = paste0(outdir, "/ab_stats.csv"), row.names = F)
+write.csv(ab_trop_stats, file = paste0(outdir, "/ab_Trop_stats.csv"), row.names = F)
 
 
-##%######################################################%##
-#                                                          #
-####                      3. RCAR                       ####
-#                                                          #
-##%######################################################%##
 
 
-system.time({rcar1 <- GLMERSelect(modelData = final.data.rcar, responseVar = "RCAR_110km",
+#### 2. Temperate subset ####
+
+# separate out the data where abundance column is not NA
+mod_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ] # 5740 rows
+
+# log the abundance values
+mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
+
+mod_dat <- droplevels(mod_dat)
+
+# run the model selection process
+system.time({ab_temp <- GLMERSelect(modelData = mod_dat, 
+                                    responseVar = "logAbun",
                                     fitFamily = "gaussian", 
-                                    fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity", "Tropical"),
+                                    fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                     fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                     randomStruct = "(1|SS)+(1|SSB)", 
                                     fixedInteractions = c("Predominant_land_use:fert.total_log", 
@@ -134,26 +120,26 @@ system.time({rcar1 <- GLMERSelect(modelData = final.data.rcar, responseVar = "RC
                                                           "Predominant_land_use:percNH",
                                                           "Use_intensity:fert.total_log", 
                                                           "Use_intensity:Hansen_mindist_log", 
-                                                          "Use_intensity:landcovers.5k",
+                                                          "Use_intensity:landcovers.5k", 
                                                           "Use_intensity:homogen",
                                                           "Use_intensity:percNH",
-                                                          "Predominant_land_use:Use_intensity",
-                                                          "Tropical:Hansen_mindist_log"), verbose = F)}
-)
+                                                          "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
-summary(rcar1$model)
+summary(ab_temp$model)
 
-# save the model output
-save(rcar1, file = paste0(outdir, "/RCAR_Model_Selection.rdata"))
+# save the output
+save(ab_temp, file = paste0(outdir, "/ABUNDANCE_Temperate_Model_Selection.rdata"))
 
 # extract the stats produced as part of the model selection process
-rcar1stats <- as.data.frame(rcar1$stats)
+ab_temp_stats <- as.data.frame(ab_temp$stats)
 
 # save these
-write.csv(rcar1stats, file = paste0(outdir, "/rcar_stats.csv"), row.names = F)
+write.csv(ab_temp_stats, file = paste0(outdir, "/ab_Temp_stats.csv"), row.names = F)
 
 
+# load(paste0(outdir, "/ABUNDANCE_Tropical_Model_Selection.rdata"))
+# load(paste0(outdir, "/ABUNDANCE_Temperate_Model_Selection.rdata"))
 
 
 ##%######################################################%##
@@ -162,100 +148,78 @@ write.csv(rcar1stats, file = paste0(outdir, "/rcar_stats.csv"), row.names = F)
 #                                                          #
 ##%######################################################%##
 
+# Take a look at the final models selected for each realm and rerun using REML
 
-# selected model for species richness
+# 1. Tropical
+summary(ab_trop$model)
 
-# Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity + Tropical + 
-# percNH + Hansen_mindist_log + fert.total_log + landcovers.5k + homogen + 
-# Predominant_land_use:fert.total_log + Predominant_land_use:landcovers.5k + Predominant_land_use:homogen +  
-# Use_intensity:fert.total_log + Use_intensity:percNH + 
-# Predominant_land_use:Use_intensity + Tropical:Hansen_mindist_log +  
-# (1 | SS) + (1 | SSB) + (1 | SSBS)
-
-# rerun the selected models, using REML
-
-srmod <- GLMER(modelData = final.data.trans, responseVar = "Species_richness", fitFamily = "poisson",
-               fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + Tropical + Hansen_mindist_log + percNH + fert.total_log + landcovers.5k + homogen + Predominant_land_use:fert.total_log + Predominant_land_use:landcovers.5k + Predominant_land_use:homogen +  Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity + Tropical:Hansen_mindist_log",
-               randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
+# logAbun ~ Forest_biome + Use_intensity + Predominant_land_use +
+# poly(homogen, 1) +   Hansen_mindist_log + landcovers.5k +
+# Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k
+# + (1 | SS) + (1 | SSB)
 
 
-# Warning messages:
-# 1: In commonArgs(par, fn, control, environment()) :
-# maxfun < 10 * length(par)^2 is not recommended.
-# 2: In optwrap(optimizer, devfun, start, rho$lower, control = control,  :
-# convergence code 1 from bobyqa: bobyqa -- maximum number of function evaluations exceeded
-# 3: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
-# Model failed to converge with max|grad| = 0.0108372 (tol = 0.001, component 1)
+# separate out the data where abundance column is not NA
+mod_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ] # 3314 rows
 
+# log the abundance values
+mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
 
-# take a look at the model output
-summary(srmod$model)
+mod_dat <- droplevels(mod_dat)
 
-# extract the coefficents of the model
-coefs <- fixef(srmod$model)
-
-# save the coefficients
-write.csv(coefs, file = paste0(outdir, "/SPECIESRICHNESS_coefs.csv"), row.names = F)
-
-# save the model output
-save(srmod, file = paste0(outdir, "/SRMOD_output.rdata"))
-
-
-# selected model for abundance
-
-# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  Tropical + 
-# Hansen_mindist_log + percNH + fert.total_log + landcovers.5k + homogen +
-# Predominant_land_use:fert.total_log + Predominant_land_use:percNH + 
-# Use_intensity:fert.total_log +  Use_intensity:percNH + 
-# Predominant_land_use:Use_intensity + Tropical:Hansen_mindist_log + 
-# (1 | SS) + (1 | SSB)
-
-# run selected model with REML
-
-abmod <- GLMER(modelData = final.data.abun, responseVar = "logAbun", fitFamily = "gaussian",
-               fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + Tropical + Hansen_mindist_log + percNH + fert.total_log + landcovers.5k + homogen + Predominant_land_use:fert.total_log + Predominant_land_use:percNH + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity + Tropical:Hansen_mindist_log",
+abmod_trop <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
+               fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + homogen + Hansen_mindist_log + landcovers.5k + Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k",
                randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
-
 # take a look at the model output
-summary(abmod$model)
+summary(abmod_trop$model)
 
 # extract the coefficents of the model
-coefs <- fixef(abmod$model)
+coefs_trop <- fixef(abmod_trop$model)
 
 # save the coefficients
-write.csv(coefs, file = paste0(outdir, "/ABUNDANCE_coefs.csv"), row.names = F)
+write.csv(coefs_trop, file = paste0(outdir, "/ABUNDANCE_Trop_coefs.csv"), row.names = F)
 
 # save the model output
-save(abmod, file = paste0(outdir, "/ABMOD_output.rdata"))
+save(abmod_trop, file = paste0(outdir, "/ABMOD_Tropical_output.rdata"))
 
 
-# selected model for RCAR
 
-# RCAR_110km ~ Predominant_land_use + Forest_biome + + Use_intensity +
-# Hansen_mindist_log + percNH  + homogen +  landcovers.5k +
-# Predominant_land_use:homogen + Predominant_land_use:percNH +  
-# Use_intensity:Hansen_mindist_log + Use_intensity:landcovers.5k +
-# Use_intensity:homogen + Predominant_land_use:Use_intensity +  
+
+
+# 2. Temperate
+summary(ab_temp$model)
+
+# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + fert.total_log +
+# Use_intensity:fert.total_log + Predominant_land_use:Use_intensity + 
 # (1 | SS) + (1 | SSB)
 
-# run selected model with REML
 
-rcarmod <- GLMER(modelData = final.data.rcar, responseVar = "RCAR_110km", fitFamily = "gaussian",
-                 fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + Hansen_mindist_log + percNH + homogen + landcovers.5k + Predominant_land_use:percNH + Predominant_land_use:homogen + Use_intensity:Hansen_mindist_log + Use_intensity:landcovers.5k + Use_intensity:homogen + Predominant_land_use:Use_intensity",
-                 randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
+# separate out the data where abundance column is not NA
+mod_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ] # 5740 rows
+
+# log the abundance values
+mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
+
+mod_dat <- droplevels(mod_dat)
+
+
+abmod_temp <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
+                    fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + percNH + fert.total_log + landcovers.5k + homogen + Use_intensity:fert.total_log + Predominant_land_use:Use_intensity",
+                    randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output
-summary(rcarmod$model)
+summary(abmod_temp$model)
 
 # extract the coefficents of the model
-coefs <- fixef(rcarmod$model)
+coefs_temp <- fixef(abmod_temp$model)
 
 # save the coefficients
-write.csv(coefs, file = paste0(outdir, "/RCAR_coefs.csv"), row.names = F)
+write.csv(coefs_temp, file = paste0(outdir, "/ABUNDANCE_Temperate_coefs.csv"), row.names = F)
 
 # save the model output
-save(rcarmod, file = paste0(outdir, "/RCAR_output.rdata"))
+save(abmod_temp, file = paste0(outdir, "/ABMOD_Temperate_output.rdata"))
 
 
 
@@ -265,45 +229,40 @@ save(rcarmod, file = paste0(outdir, "/RCAR_output.rdata"))
 #                                                          #
 ##%######################################################%##
 
-srr2 <- R2GLMER(srmod$model) # [1] conditional, [2] marginal
-abr2 <- R2GLMER(abmod$model)
-rcarr2 <- R2GLMER(rcarmod$model)
+abr2_trop <- R2GLMER(abmod_trop$model) # [1] conditional, [2] marginal
+abr2_temp <- R2GLMER(abmod_temp$model)
 
 # Look at the proportion of variance unexplained by the random effects, but
 # explained by the fixed effects...  Marginal/(1 - (Conditional - Marginal))
 
 
-srper <- srr2[[2]]/(1-(srr2[[1]] - srr2[[2]]))
-abper <- abr2[[2]]/(1-(abr2[[1]] - abr2[[2]]))
-rcarper <- rcarr2[[2]]/(1-(rcarr2[[1]] - rcarr2[[2]]))
+abper_trop <- abr2_trop[[2]]/(1-(abr2_trop[[1]] - abr2_trop[[2]]))
+abper_temp <- abr2_temp[[2]]/(1-(abr2_temp[[1]] - abr2_temp[[2]]))
 
 
 # organise values in a table
 
 result <- NULL
 
-srres  <- unlist(c(srr2[1], srr2[2], srper))
-abres  <- unlist(c(abr2[1], abr2[2], abper))
-rcarres  <- unlist(c(rcarr2[1], rcarr2[2], rcarper))
+abres_trop <- unlist(c(abr2_trop[1], abr2_trop[2], abper_trop))
+abres_temp  <- unlist(c(abr2_temp[1], abr2_temp[2], abper_temp))
 
-result <- rbind(srres, abres, rcarres)
+result <- rbind(abres_trop, abres_temp)
 
 colnames(result)[3] <- "proportion unexplained variance explained by fixed effects"
 
-rownames(result) <- c("SR", "Abun", "RCAR")
+rownames(result) <- c("Abun Trop", "Abun Temp")
 
 # save
-write.csv(result, file = paste0(outdir, "/Rsquareds.csv"))
+write.csv(result, file = paste0(outdir, "/Rsquareds_Abun.csv"))
 
 
 
 # save model output tables
-library(sjPlot)
-library(lme4)
 
-tab_model(srmod$model, transform = NULL, file = paste0(outdir, "/SR_output_table"))
-tab_model(abmod$model, transform = NULL, file = paste0(outdir, "/AB_output_table"))
-tab_model(rcarmod$model, transform = NULL, file = paste0(outdir, "/RCAR_output_table"))
+tab_model(abmod_trop$model, transform = NULL, file = paste0(outdir, "/AB_Trop_output_table.html"))
+tab_model(abmod_temp$model, transform = NULL, file = paste0(outdir, "/AB_Temp_output_table.html"))
+
 
 
 
@@ -314,72 +273,19 @@ tab_model(rcarmod$model, transform = NULL, file = paste0(outdir, "/RCAR_output_t
 ##%######################################################%##
 
 
-### SR models ###
+
+### Temperate ###
+
 
 ## 1. Checking the fitted vs residuals relationship
-p1 <- plot(srmod$model)
-# this kind of check is not informative for model with poisson error. Not included in supplementary.
+p1 <- plot(abmod_temp$model)
 
 
 ## 2. Normality of Residuals
 
 pdf(NULL)
 dev.control(displaylist="enable")
-qqnorm(resid(srmod$model), main = "")
-p2 <- recordPlot()
-invisible(dev.off())
-
-
-
-## 3. Check for spatial autocorrelation
-
-sr_test<-roquefort::SpatialAutocorrelationTest(model=srmod, all.data=final.data.trans)
-
-
-summary(sr_test)
-
-# percentage of studies that show spatial autocorrelation?
-perc_auto <- (length(which(sr_test$P<0.05))/length(sr_test$P))*100
-
-# 5.29%
-
-sr_test_vals <- as.data.frame(sr_test$P)
-sr_test_vals$`sr_test$P` <- round(sr_test_vals$`sr_test$P`, digits = 4)
-
-label1 <- paste0("P < 0.05 \nin ", round(perc_auto, 1), "% \nof studies")
-
-p3 <- ggplot(data = sr_test_vals ) +
-  geom_histogram(aes(x = sr_test_vals$`sr_test$P`)) +
-  geom_vline(xintercept = 0.05, col = "red") +
-  geom_text(aes(x = 0.2, y = 125, label = label1), size = 4, check_overlap = T) +
-  theme_bw() +
-  xlab("P-value") +
-  ylab("Frequency") +
-  theme(panel.grid = element_blank(), 
-        aspect.ratio = 1)
-
-
-
-plot_grid(p2,p3,
-          labels = c("A.", "B."))
-
-
-ggsave(file = paste0(outdir, "/SR_model_checks_plots.pdf"), height = 4, width = 8)
-
-
-
-### Abundance plots ###
-
-
-## 1. Checking the fitted vs residuals relationship
-p1 <- plot(abmod$model)
-
-
-## 2. Normality of Residuals
-
-pdf(NULL)
-dev.control(displaylist="enable")
-qqnorm(resid(abmod$model), main = "")
+qqnorm(resid(abmod_temp$model), main = "")
 p2 <- recordPlot()
 invisible(dev.off())
 
@@ -388,12 +294,15 @@ invisible(dev.off())
 ## 3. Check for spatial autocorrelation
 
 # needed for following function
-abmod$data$SSBS <- final.data.abun$SSBS
-abmod$data$Latitude <- final.data.abun$Latitude
-abmod$data$Longitude <- final.data.abun$Longitude
+
+abun_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ]
+
+abmod_temp$data$SSBS <- abun_dat$SSBS
+abmod_temp$data$Latitude <- abun_dat$Latitude
+abmod_temp$data$Longitude <- abun_dat$Longitude
 
 
-ab_test<-roquefort::SpatialAutocorrelationTest(model=abmod, all.data=final.data.abun)
+ab_test<-roquefort::SpatialAutocorrelationTest(model=abmod_temp, all.data=abun_dat)
 
 
 summary(ab_test)
@@ -401,10 +310,10 @@ summary(ab_test)
 # percentage of studies that show spatial autocorrelation?
 perc_auto <- (length(which(ab_test$P<0.05))/length(ab_test$P))*100
 
-# 9.4%
+# 8.6%
 
 ab_test_vals <- as.data.frame(ab_test$P)
-ab_test_vals$`ab_test$P` <- round(sr_test_vals$`ab_test$P`, digits = 4)
+ab_test_vals$`ab_test$P` <- round(ab_test_vals$`ab_test$P`, digits = 4)
 
 label1 <- paste0("P < 0.05 \nin ", round(perc_auto, 1), "% \nof studies")
 
@@ -420,57 +329,60 @@ p3 <- ggplot(data = ab_test_vals ) +
 
 
 
-plot_grid(p1,p2,p3,
+cowplot::plot_grid(p1,p2,p3,
           labels = c("A.", "B.", "C."))
 
 
-ggsave(file = paste0(outdir, "/Abun_model_checks_plots.pdf"), height = 9, width = 9)
+ggsave(file = paste0(outdir, "/Abun_Temperate_model_checks_plots.pdf"), height = 9, width = 9)
 
 
 
-### RCAR model ###
 
+### Tropical ###
 
 
 ## 1. Checking the fitted vs residuals relationship
-p1 <- plot(rcarmod$model)
+p1 <- plot(abmod_trop$model)
 
 
 ## 2. Normality of Residuals
 
 pdf(NULL)
 dev.control(displaylist="enable")
-qqnorm(resid(rcarmod$model), main = "", ylim = c(-4,4))
+qqnorm(resid(abmod_trop$model), main = "")
+qqline(resid(abmod_trop$model))
 p2 <- recordPlot()
 invisible(dev.off())
-
 
 
 ## 3. Check for spatial autocorrelation
 
 # needed for following function
-rcarmod$data$SSBS <- final.data.rcar$SSBS
-rcarmod$data$Latitude <- final.data.rcar$Latitude
-rcarmod$data$Longitude <- final.data.rcar$Longitude
+
+abun_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ]
+
+abmod_trop$data$SSBS <- abun_dat$SSBS
+abmod_trop$data$Latitude <- abun_dat$Latitude
+abmod_trop$data$Longitude <- abun_dat$Longitude
 
 
-rcar_test<-roquefort::SpatialAutocorrelationTest(model=rcarmod, all.data=final.data.rcar)
+ab_test<-roquefort::SpatialAutocorrelationTest(model=abmod_trop, all.data=abun_dat)
 
 
-summary(rcar_test)
+summary(ab_test)
 
 # percentage of studies that show spatial autocorrelation?
-perc_auto <- (length(which(rcar_test$P<0.05))/length(rcar_test$P))*100
+perc_auto <- (length(which(ab_test$P<0.05))/length(ab_test$P))*100
 
-# 5.594406%
+# 8.5%
 
-rcar_test_vals <- as.data.frame(rcar_test$P)
-rcar_test_vals$`ab_test$P` <- round(rcar_test_vals$`rcar_test$P`, digits = 4)
+ab_test_vals <- as.data.frame(ab_test$P)
+ab_test_vals$`ab_test$P` <- round(ab_test_vals$`ab_test$P`, digits = 4)
 
 label1 <- paste0("P < 0.05 \nin ", round(perc_auto, 1), "% \nof studies")
 
-p3 <- ggplot(data = rcar_test_vals ) +
-  geom_histogram(aes(x = rcar_test_vals$`ab_test$P`)) +
+p3 <- ggplot(data = ab_test_vals ) +
+  geom_histogram(aes(x = ab_test_vals$`ab_test$P`)) +
   geom_vline(xintercept = 0.05, col = "red") +
   geom_text(aes(x = 0.2, y = 90, label = label1), size = 4, check_overlap = T) +
   theme_bw() +
@@ -481,12 +393,9 @@ p3 <- ggplot(data = rcar_test_vals ) +
 
 
 
-plot_grid(p1,p2,p3,
-          labels = c("A.", "B.", "C."))
+cowplot::plot_grid(p1,p2,p3,
+                   labels = c("A.", "B.", "C."))
 
 
-ggsave(file = paste0(outdir, "/RCAR_model_checks_plots.pdf"), height = 9, width = 9)
-
-
-
+ggsave(file = paste0(outdir, "/Abun_Tropical_model_checks_plots.pdf"), height = 9, width = 9)
 
