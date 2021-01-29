@@ -494,6 +494,36 @@ dev.off()
 # save the untransformed dataset including all variables
 save(sites.sub, file = paste0(outdir, "/PREDICTS_dataset_inc_variables.rdata"))
 
+# load(file = paste0(outdir, "/PREDICTS_dataset_inc_variables.rdata"))
+
+
+#### take a look at correlations in realm data subsets ####
+
+sites.sub_trop <- sites.sub[sites.sub$Tropical == "Tropical", ]
+
+pdf(file = paste0(outdir, "/Correlations_all_Trop.pdf"), width =14, height = 9)
+
+# correlations, including all nlandcovers buffers
+pairs(sites.sub_trop[ , c(21:34)], 
+      upper.panel=panel.cor, 
+      diag.panel = panel.hist, 
+      main = "",
+      cex = 2)
+
+dev.off()
+
+sites.sub_temp <- sites.sub[sites.sub$Tropical == "Temperate", ]
+
+pdf(file = paste0(outdir, "/Correlations_all_Temp.pdf"), width =14, height = 9)
+# correlations, including all nlandcovers buffers
+pairs(sites.sub_temp[ , c(21:34)], 
+      upper.panel=panel.cor, 
+      diag.panel = panel.hist, 
+      main = "",
+      cex = 2)
+
+dev.off()
+
 
 ##%######################################################%##
 #                                                          #
@@ -618,46 +648,31 @@ save(final.data.trans, file = paste0(outdir, "/PREDICTS_dataset_inc_variables_TR
 #                                                          #
 ##%######################################################%##
 
-# Subsets of the data required for the abundance models and the range size models
+# load(file = paste0(outdir, "/PREDICTS_dataset_inc_variables_TRANS.rdata"))
 
-## abundance subset
-final.data.abun <- final.data.trans[!is.na(final.data.trans$Total_abundance), ] # 9054 rows
+final.data.trans_trop <- final.data.trans[final.data.trans$Tropical == "Tropical", ]
+nrow(final.data.trans_trop) # 3719
 
-# log the abundance values
-final.data.abun$logAbun <- log(final.data.abun$Total_abundance+1)
+final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperate", ]
+nrow(final.data.trans_temp) # 6674
 
+pdf(file = paste0(outdir, "/Correlations_final_variables_Trop.pdf"), width =9, height = 9)
+# correlations of final set of variables - transformed
+pairs(final.data.trans_trop[ , c(23:25, 27:28)], 
+      upper.panel=panel.cor, 
+      diag.panel = panel.hist, 
+      main = "",
+      cex.labels = 1.3)
+dev.off()
 
-# Incorporate the RCAR data
-
-# Set the path to your local copy of the database
-predicts.path <- paste0(datadir, "/PREDICTS_Sites_Mean_RangeSizes.rds")
-
-# Read in the PREDICTS data
-predicts <- ReadPREDICTS(predicts.path)
-
-# Use unique SSBS values to match up the two datasets.
-final.data.rcar<- merge(final.data.trans, predicts, by = "SSBS", all.x= T)
-
-# how many of these have values
-sum(!is.na(final.data.rcar$RCAR_110km)) #5742
-
-# remove duplicated columns
-final.data.rcar <- final.data.rcar[ , c(1:28, 37)]
-
-# remove NAs
-final.data.rcar <- final.data.rcar[!is.na(final.data.rcar$RCAR_110km), ] # 5742 rows
-
-# remove the .x from column names
-colnames(final.data.rcar) <- sub(".x", "", colnames(final.data.rcar))
-
-final.data.abun <- droplevels(final.data.abun)
-final.data.rcar <- droplevels(final.data.rcar)
-
-# save
-save(final.data.abun, file = paste0(outdir, "/PREDICTS_abun_subset.rdata"))
-save(final.data.rcar, file = paste0(outdir, "/PREDICTS_rcar_subset.rdata"))
-
-
+pdf(file = paste0(outdir, "/Correlations_final_variables_Temp.pdf"), width =9, height = 9)
+# correlations of final set of variables - transformed
+pairs(final.data.trans_temp[ , c(23:25, 27:28)], 
+      upper.panel=panel.cor, 
+      diag.panel = panel.hist, 
+      main = "",
+      cex.labels = 1.3)
+dev.off()
 
 ##%######################################################%##
 #                                                          #
@@ -667,14 +682,15 @@ save(final.data.rcar, file = paste0(outdir, "/PREDICTS_rcar_subset.rdata"))
 
 # get the number of studies, sites, etc for the paper
 
-length(unique(final.data.trans$SS)) # 480 studies
-nrow(final.data.trans) # 10393 sites
+# 1. Tropical
 
-length(unique(final.data.abun$SS)) # 429 studies
-nrow(final.data.abun) # 9054 sites
+length(unique(final.data.trans_trop$SS)) # 224 studies
+nrow(final.data.trans_trop) # 3719 sites
 
-length(unique(final.data.rcar$SS)) # 312 studies
-nrow(final.data.rcar) # 5742 sites
+# 2. Temperate
+
+length(unique(final.data.trans_temp$SS)) # 257 studies
+nrow(final.data.trans_temp) # 6674 sites
 
 
 

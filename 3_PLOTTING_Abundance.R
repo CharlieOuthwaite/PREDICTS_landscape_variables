@@ -38,7 +38,7 @@ load(paste0(moddir, "/final.data.trans_temp_ABUN.rdata"))
 summary(abmod_trop$model)
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# homogen + Hansen_mindist_log + landcovers.5k + 
+# poly(homogen, 1) + Hansen_mindist_log + landcovers.5k + 
 # Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k + 
 # (1 | SS) + (1 | SSB)
 
@@ -410,8 +410,8 @@ ggsave(filename = paste0(outdir, "/Tropical_Abun_distLU.pdf"))
 summary(abmod_temp$model)
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# percNH + fert.total_log + landcovers.5k + homogen + 
-# Use_intensity:fert.total_log +  Predominant_land_use:Use_intensity + 
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen,1) + poly(percNH, 1) + fert.total_log + 
+# Use_intensity:fert.total_log +  Predominant_land_use:Use_intensity
 # (1 | SS) + (1 | SSB)
 
 #### Land use ####
@@ -663,7 +663,7 @@ ggsave(filename = paste0(outdir, "/Temperate_Abun_percNH.pdf"))
 
 
 
-### Fertiliser overall ###
+#### Fertiliser overall ####
 
 from = 0
 to = 2000000

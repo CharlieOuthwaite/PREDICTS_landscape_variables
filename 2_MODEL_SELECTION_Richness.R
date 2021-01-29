@@ -35,9 +35,11 @@ final.data.trans <- droplevels(final.data.trans)
 
 final.data.trans_trop <- final.data.trans[final.data.trans$Tropical == "Tropical", ]
 nrow(final.data.trans_trop)
+final.data.trans_trop <- droplevels(final.data.trans_trop)
 
 final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperate", ]
 nrow(final.data.trans_temp)
+final.data.trans_temp <- droplevels(final.data.trans_temp)
 
 
 ##%######################################################%##
@@ -136,9 +138,13 @@ summary(sr_trop$model)
 #  Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log + Use_intensity:landcovers.5k + Use_intensity:percNH + 
 # (1 | SS) + (1 | SSB) +  (1 | SSBS)
 
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(homogen, 1) + homogen + percNH + landcovers.5k + fert.total_log +  Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log + Use_intensity:landcovers.5k + Use_intensity:percNH"
+
+
 srmod_trop <- GLMER(modelData = final.data.trans_trop, responseVar = "Species_richness", fitFamily = "poisson",
-               fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + percNH + fert.total_log + landcovers.5k + homogen + Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log + Use_intensity:landcovers.5k + Use_intensity:percNH",
-               randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
+                    fixedStruct = mod_struc,
+                    randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
+
 
 
 # take a look at the model output
@@ -162,13 +168,20 @@ summary(sr_temp$model)
 # Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity +  
 # (1 | SS) + (1 | SSB) + (1 | SSBS)
 
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + homogen + fert.total_log + percNH + Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity"
 
 srmod_temp <- GLMER(modelData = final.data.trans_temp, responseVar = "Species_richness", fitFamily = "poisson",
-                    fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + Hansen_mindist_log + percNH + fert.total_log + homogen + Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity",
+                    fixedStruct = mod_struc,
                     randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
 
 
-# Model failed to converge with max|grad| = 0.00759779 (tol = 0.001, component 1)
+#fixed-effect model matrix is rank deficient so dropping 3 columns / coefficients
+#Warning messages:
+# 1: In optwrap(optimizer, devfun, start, rho$lower, control = control,  :
+# convergence code 1 from bobyqa: bobyqa -- maximum number of function evaluations exceeded
+# 2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+# Model failed to converge with max|grad| = 0.00979875 (tol = 0.001, component 1)
+
 
 # take a look at the model output
 summary(srmod_temp$model)
@@ -278,7 +291,7 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 
-plot_grid(p2,p3,
+cowplot::plot_grid(p2,p3,
           labels = c("A.", "B."))
 
 
@@ -333,7 +346,7 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 
-plot_grid(p2,p3,
+cowplot::plot_grid(p2,p3,
           labels = c("A.", "B."))
 
 

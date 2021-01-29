@@ -20,6 +20,7 @@ library(roquefort)
 library(cowplot)
 library(gridGraphics)
 library(predictsFunctions)
+library(sjPlot)
 
 
 # directories
@@ -61,9 +62,14 @@ final.data.rcar <- droplevels(final.data.rcar)
 
 final.data.rcar_trop <- final.data.rcar[final.data.rcar$Tropical == "Tropical", ]
 nrow(final.data.rcar_trop) # 1988
-
+final.data.rcar_trop <- droplevels(final.data.rcar_trop )
+  
 final.data.rcar_temp <- final.data.rcar[final.data.rcar$Tropical == "Temperate", ]
 nrow(final.data.rcar_temp) # 3754
+final.data.rcar_temp <- droplevels(final.data.rcar_temp)
+  
+save(final.data.rcar_trop, file = paste0(outdir, "/final.data.trans_trop_RCAR.rdata"))
+save(final.data.rcar_temp, file = paste0(outdir, "/final.data.trans_temp_RCAR.rdata"))
 
 
 ##%######################################################%##
@@ -171,8 +177,10 @@ summary(rcar_trop$model)
 
 # run selected model with REML
 
+mod_struc <- "Predominant_land_use + homogen + percNH + Predominant_land_use:homogen + Predominant_land_use:percNH"
+
 rcarmod_trop <- GLMER(modelData = final.data.rcar_trop, responseVar = "RCAR_110km", fitFamily = "gaussian",
-                 fixedStruct = "Predominant_land_use + percNH + homogen + Predominant_land_use:homogen + Predominant_land_use:percNH",
+                 fixedStruct = mod_struc,
                  randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output
@@ -201,12 +209,17 @@ summary(rcar_temp$model)
 
 # fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
 
-
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(homogen, 1) + fert.total_log + homogen + percNH + Predominant_land_use:fert.total_log +  Predominant_land_use:homogen + Predominant_land_use:percNH +  Use_intensity:fert.total_log + Use_intensity:homogen"
+  
+  
 # run selected model with REML
 
 rcarmod_temp <- GLMER(modelData = final.data.rcar_temp, responseVar = "RCAR_110km", fitFamily = "gaussian",
-                      fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + fert.total_log + percNH + homogen + Predominant_land_use:fert.total_log +  Predominant_land_use:homogen + Predominant_land_use:percNH + Use_intensity:fert.total_log + Use_intensity:homogen",
+                      fixedStruct = mod_struc,
                       randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
+
+# fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+
 
 # take a look at the model output
 summary(rcarmod_temp$model)
@@ -290,7 +303,7 @@ invisible(dev.off())
 
 ## 3. Check for spatial autocorrelation
 
-rcar_dat <- final.data.trans_trop[!is.na(final.data.rcar_trop$RCAR_110km), ]
+rcar_dat <- final.data.rcar_trop[!is.na(final.data.rcar_trop$RCAR_110km), ]
 
 
 # needed for following function
@@ -326,7 +339,7 @@ p3 <- ggplot(data = rcar_test_vals ) +
 
 
 
-plot_grid(p1,p2,p3,
+cowplot::plot_grid(p1,p2,p3,
           labels = c("A.", "B.", "C."))
 
 
@@ -390,7 +403,7 @@ p3 <- ggplot(data = rcar_test_vals ) +
 
 
 
-plot_grid(p1,p2,p3,
+cowplot::plot_grid(p1,p2,p3,
           labels = c("A.", "B.", "C."))
 
 

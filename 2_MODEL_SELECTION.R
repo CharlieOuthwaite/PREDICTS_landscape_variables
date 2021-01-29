@@ -43,6 +43,24 @@ nrow(final.data.trans_trop) # 3719
 final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperate", ]
 nrow(final.data.trans_temp) # 6674
 
+# separate out the data where abundance column is not NA
+final.data.trans_trop_ABUN <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ] # 3314 rows
+
+# log the abundance values
+final.data.trans_trop_ABUN$logAbun <- log(final.data.trans_trop_ABUN$Total_abundance+1)
+
+
+# separate out the data where abundance column is not NA
+final.data.trans_temp_ABUN <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ] # 5740 rows
+
+# log the abundance values
+final.data.trans_temp_ABUN$logAbun <- log(final.data.trans_temp_ABUN$Total_abundance+1)
+
+final.data.trans_trop_ABUN <- droplevels(final.data.trans_trop_ABUN)
+final.data.trans_temp_ABUN <- droplevels(final.data.trans_temp_ABUN)
+
+save(final.data.trans_trop_ABUN, file = paste0(outdir, "/final.data.trans_trop_ABUN.rdata"))
+save(final.data.trans_temp_ABUN, file = paste0(outdir, "/final.data.trans_temp_ABUN.rdata"))
 
 ##%######################################################%##
 #                                                          #
@@ -54,10 +72,8 @@ nrow(final.data.trans_temp) # 6674
 #### 1. Tropical subset ####
 
 # separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ] # 3314 rows
+mod_dat <- final.data.trans_trop_ABUN
 
-# log the abundance values
-mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
 
 # check for NAs in other columns
 summary(is.na(mod_dat))
@@ -99,12 +115,7 @@ write.csv(ab_trop_stats, file = paste0(outdir, "/ab_Trop_stats.csv"), row.names 
 #### 2. Temperate subset ####
 
 # separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ] # 5740 rows
-
-# log the abundance values
-mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
-
-mod_dat <- droplevels(mod_dat)
+mod_dat <- final.data.trans_temp_ABUN
 
 # run the model selection process
 system.time({ab_temp <- GLMERSelect(modelData = mod_dat, 
@@ -158,17 +169,10 @@ summary(ab_trop$model)
 # Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k
 # + (1 | SS) + (1 | SSB)
 
+mod_struc <- "Forest_biome + Use_intensity + Predominant_land_use + poly(homogen, 1) + Hansen_mindist_log + landcovers.5k + Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k"
 
-# separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ] # 3314 rows
-
-# log the abundance values
-mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
-
-mod_dat <- droplevels(mod_dat)
-
-abmod_trop <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
-               fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + homogen + Hansen_mindist_log + landcovers.5k + Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k",
+abmod_trop <- GLMER(modelData = final.data.trans_trop_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
+               fixedStruct = mod_struc,
                randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output
@@ -195,18 +199,10 @@ summary(ab_temp$model)
 # Use_intensity:fert.total_log + Predominant_land_use:Use_intensity + 
 # (1 | SS) + (1 | SSB)
 
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + fert.total_log + Use_intensity:fert.total_log + Predominant_land_use:Use_intensity"
 
-# separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ] # 5740 rows
-
-# log the abundance values
-mod_dat$logAbun <- log(mod_dat$Total_abundance+1)
-
-mod_dat <- droplevels(mod_dat)
-
-
-abmod_temp <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
-                    fixedStruct = "Predominant_land_use + Forest_biome + Use_intensity + percNH + fert.total_log + landcovers.5k + homogen + Use_intensity:fert.total_log + Predominant_land_use:Use_intensity",
+abmod_temp <- GLMER(modelData = final.data.trans_temp_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
+                    fixedStruct = mod_struc,
                     randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output

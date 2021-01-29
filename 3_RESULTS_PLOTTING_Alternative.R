@@ -2080,3 +2080,36 @@ trop_plots <- marrangeGrob(grobs = list(p[[11]], q[[10]]), npages = 1, ncol = 2,
 
 ggsave(filename = paste0(outdir, "/Paper_tropical_plots.pdf"), trop_plots, height = 4, width = 8)
 
+
+
+
+##%######################################################%##
+#                                                          #
+####          Alternative figure combinations           ####
+#                                                          #
+##%######################################################%##
+
+
+# species richness
+
+
+SR_plots <- marrangeGrob(grobs = list(p[[1]] + ggtitle(),  p[[7]],  p[[6]], p[[2]], p[[8]]), npages = 1, ncol = 2, nrow = 3, top = "")
+
+ggsave(filename = paste0(outdir, "/Paper_tropical_plots.pdf"), trop_plots, height = 4, width = 8)
+
+
+# Abundance
+
+
+Ab_plots <- marrangeGrob(grobs = list(q[[7]], q[[4]], q[[5]], q[[6]]), npages = 1, ncol = 2, nrow = 2, top = "")
+
+ggsave(filename = paste0(outdir, "/Paper_tropical_plots.pdf"), trop_plots, height = 4, width = 8)
+
+
+# RCAR
+
+Rcar_plots <- marrangeGrob(grobs = list(r[[1]], r[[6]], r[[5]]), npages = 1, ncol = 2, nrow = 2, top = "")
+
+ggsave(filename = paste0(outdir, "/Paper_tropical_plots.pdf"), trop_plots, height = 4, width = 8)
+
+
