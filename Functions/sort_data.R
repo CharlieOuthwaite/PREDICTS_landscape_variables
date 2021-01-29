@@ -23,7 +23,7 @@ sort_data <- function(modout = NULL, moddata = NULL, scalers = NULL, from = NULL
                          Forest_biome = "Temperate Broadleaf & Mixed Forests",
                          Use_intensity = "Minimal use",
                          Predominant_land_use = "Primary vegetation",
-                         Tropical = "Temperate",
+                         #Tropical = "Temperate",
                          Species_richness = 0,
                          logAbun = 0, 
                          RCAR_110km = 0)
@@ -35,9 +35,9 @@ sort_data <- function(modout = NULL, moddata = NULL, scalers = NULL, from = NULL
   levels(pred_tab$Use_intensity) <- levels(modout$data$Use_intensity) 
   levels(pred_tab$Forest_biome) <- levels(modout$data$Forest_biome) 
   
-  if(!is.null(modout$data$Tropical)){
-  levels(pred_tab$Tropical) <- levels(modout$data$Tropical) 
-  }
+  #if(!is.null(modout$data$Tropical)){
+  #levels(pred_tab$Tropical) <- levels(modout$data$Tropical) 
+  #}
   
   
   # 2. make changes to table to specify values to predict
