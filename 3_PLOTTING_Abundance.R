@@ -120,23 +120,23 @@ resulta.lower <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.025))
 errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
-pdf(file = paste0(outdir, "/Tropical_AbunLUUI.pdf"))
+pdf(file = paste0(outdir, "/Tropical_Abun_LUUI.pdf"))
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
-       ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
+       ylim=c(-50,50),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Total Abundance (%)",xlab="",bty="l")
+       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab =1.2, cex.axis = 1.2)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5)
+     padj = 0.5, cex.lab =1.2)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0))
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.2)
 
 dev.off()
 
@@ -389,7 +389,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans_trop_ABUN, aes(x = Hansen_mindist, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,200)) +
+  ylim(c(0,250)) +
   xlim(c(0, 100)) +
   xlab("Distance to Forest (Km)") +
   ylab("Total Abundance") +
@@ -397,9 +397,10 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.position = c(0.3,0.85), legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        aspect.ratio = 1, legend.background = element_blank(),
+        text = element_text(size = 14)) 
 
 ggsave(filename = paste0(outdir, "/Tropical_Abun_distLU.pdf"))
 
@@ -492,23 +493,24 @@ resulta.lower <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.025))
 errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
-pdf(file = paste0(outdir, "/Temperate_AbunLUUI.pdf"))
+pdf(file = paste0(outdir, "/Temperate_Abun_LUUI.pdf"))
+
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Total Abundance (%)",xlab="",bty="l")
+       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab = 1.2, cex.axis = 1.2)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5)
+     padj = 0.5, cex= 1.2)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0))
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.2)
 
 dev.off()
 
