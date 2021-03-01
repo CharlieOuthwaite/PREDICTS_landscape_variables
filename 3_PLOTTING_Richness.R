@@ -138,17 +138,17 @@ errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Species Richness (%)",xlab="",bty="l")
+       ylab="Species Richness (%)",xlab="",bty="l", cex.lab =1.4, cex.axis = 1.4)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5)
+     padj = 0.5, cex.axis =1.4)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topright", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0))
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex =1.4)
 
 dev.off()
 
@@ -414,7 +414,7 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_landcoversUI.pdf"))
 
 
 
-### Fertilier, by land use ###
+#### Fertilier, by land use ####
 
 # in this instance, predicting fertiliser vals 
 from = 0
@@ -472,11 +472,11 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_fertLU.pdf"))
 
 
 
-### Homogen, by land use ###
+#### Homogen, by land use ####
 
 # in this instance, predicting fertiliser vals 
-from = 0
-to = 1
+from = 0.21
+to = 0.66
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- 'Predominant_land_use'
@@ -515,7 +515,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0,20)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
   ylab("Species Richness") +
@@ -534,10 +534,10 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_homogenLU.pdf"))
 
 
 
-### percNH, by land use ###
+#### percNH, by land use ####
 
-from = 0
-to = 100
+from = 12
+to = 99
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'percNH'
 fac <- 'Predominant_land_use'
@@ -576,7 +576,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0,25)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
   ylab("Species Richness") +
@@ -584,7 +584,7 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.8), legend.title = element_blank(),
+        legend.position = c(0.2,0.9), legend.title = element_blank(),
         legend.text = element_text(size = 6),
         aspect.ratio = 1, legend.background = element_blank()) 
 
@@ -594,10 +594,10 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_percNHLU.pdf"))
 
 
 
-### percNH, byuse intensity ###
+#### percNH, by use intensity ####
 
-from = 0
-to = 100
+from = 12
+to = 99
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'percNH'
 fac <- 'Use_intensity'
@@ -636,7 +636,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1, col = Use_intensity), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0, 25)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
   ylab("Species Richness") +
@@ -644,10 +644,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.9), legend.title = element_blank(),
+        legend.position = c(0.2,0.9), legend.title = element_blank(),
         legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
-
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_percNHUI.pdf"))
 
@@ -749,17 +748,17 @@ errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Species Richness (%)",xlab="",bty="l")
+       ylab="Species Richness (%)",xlab="",bty="l", cex.lab = 1.4, cex.axis = 1.4)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5)
+     padj = 0.5, cex.axis = 1.4)
 
 abline(h=0,col="#00000077",lty=2)
 
-legend("topright", 
+legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0))
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.4)
 
 dev.off()
 
@@ -857,8 +856,8 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y), col = c("#458B00")) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus), fill = c("#458B00"), alpha = 0.3) +
   geom_rug(data = final.data.trans_temp, aes(x = Hansen_mindist), size = 0.1) +
-  ylim(c(0, 30)) +
-  xlim(c(0, 100)) +
+  ylim(c(0, 25)) +
+  xlim(c(0, 75)) +
   xlab("Distance to Forest (Km)") +
   ylab("Species Richness") +
   theme_bw() +
@@ -971,10 +970,10 @@ ggsave(filename = paste0(outdir, "/Temperate_Rich_homogen.pdf"))
 
 
 
-### Homogen, by land use ###
+#### Homogen, by land use ####
 
-from = 0
-to = 1
+from = 0.14
+to = 0.66
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- 'Predominant_land_use'
@@ -1012,7 +1011,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0, 50)) +
+  ylim(c(0, 35)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
   ylab("Species Richness") +
@@ -1086,7 +1085,7 @@ ggsave(filename = paste0(outdir, "/Temperate_Rich_fertUI.pdf"))
 
 
 
-### percNH, by use intensity ###
+#### percNH, by use intensity ####
 
 from = 0
 to = 100
@@ -1128,7 +1127,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1, col = Use_intensity), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0,25)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
   ylab("Species Richness") +
@@ -1136,9 +1135,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.9), legend.title = element_blank(),
+        legend.position = c(0.2,0.9), legend.title = element_blank(),
         legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 
 ggsave(filename = paste0(outdir, "/Temperate_Rich_percNHUI.pdf"))
