@@ -394,7 +394,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   #geom_rug(data = landcovers.5k, aes(x = V1)) +
-  ylim(c(0, 30)) +
+  ylim(c(0, 25)) +
   xlim(c(0, 10)) +
   xlab("Number of Landcovers") +
   ylab("Species Richness") +
@@ -402,9 +402,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.8), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
+        legend.position = c(0.8,0.9), legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_landcoversUI.pdf"))
@@ -454,7 +454,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans_trop, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0,25)) +
   xlim(c(0, 3000)) +
   xlab("Total fertiliser application (Kgs)") +
   ylab("Species Richness") +
@@ -462,8 +462,8 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
+        legend.position = c(0.3,0.85), legend.title = element_blank(),
+        legend.text = element_text(size = 10),
         aspect.ratio = 1, legend.background = element_blank()) 
 
 
@@ -1067,7 +1067,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans_temp, aes(x = fert.total, col = Use_intensity), size = 0.1) +
-  ylim(c(0,30)) +
+  ylim(c(0,25)) +
   xlim(c(0, 3000)) +
   xlab("Total fertiliser application (Kgs)") +
   ylab("Species Richness") +
@@ -1075,9 +1075,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
+        legend.position = c(0.8,0.2), legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 
 

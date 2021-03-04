@@ -338,9 +338,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.8), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
+        legend.position = c(0.8,0.9), legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Abun_landcoversUI.pdf"))
@@ -760,8 +760,8 @@ result$factor <- pred_tab[, fac]
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1) 
+        legend.text = element_text(size = 10),
+        aspect.ratio = 1, legend.background = element_blank()) 
 
 
 
