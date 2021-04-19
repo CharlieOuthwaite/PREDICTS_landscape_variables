@@ -19,6 +19,7 @@ library(StatisticalModels)
 library(roquefort)
 library(cowplot)
 library(gridGraphics)
+library(sjPlot)
 
 
 # directories
@@ -60,16 +61,16 @@ system.time({sr_trop <- GLMERSelect(modelData = final.data.trans_trop,
                                 fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                 fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                 randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)", 
-                                fixedInteractions = c("Predominant_land_use:fert.total_log", 
-                                                      "Predominant_land_use:Hansen_mindist_log",
-                                                      "Predominant_land_use:landcovers.5k", 
-                                                      "Predominant_land_use:homogen", 
-                                                      "Predominant_land_use:percNH",
-                                                      "Use_intensity:fert.total_log", 
-                                                      "Use_intensity:Hansen_mindist_log",
-                                                      "Use_intensity:landcovers.5k",
-                                                      "Use_intensity:homogen",
-                                                      "Use_intensity:percNH",
+                                fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
+                                                      "Predominant_land_use:poly(Hansen_mindist_log,1)",
+                                                      "Predominant_land_use:poly(landcovers.5k,1)", 
+                                                      "Predominant_land_use:poly(homogen,1)", 
+                                                      "Predominant_land_use:poly(percNH,1)",
+                                                      "Use_intensity:poly(fert.total_log,1)", 
+                                                      "Use_intensity:poly(Hansen_mindist_log,1)",
+                                                      "Use_intensity:poly(landcovers.5k,1)",
+                                                      "Use_intensity:poly(homogen,1)",
+                                                      "Use_intensity:poly(percNH,1)",
                                                       "Predominant_land_use:Use_intensity"), verbose = F)}) 
 # save the output
 save(sr_trop, file = paste0(outdir, "/SPECIESRICHNESS_Tropical_Model_selection.rdata"))
@@ -96,16 +97,16 @@ system.time({sr_temp <- GLMERSelect(modelData = final.data.trans_temp,
                                 fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                 fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                 randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)", 
-                                fixedInteractions = c("Predominant_land_use:fert.total_log", 
-                                                      "Predominant_land_use:Hansen_mindist_log",
-                                                      "Predominant_land_use:landcovers.5k", 
-                                                      "Predominant_land_use:homogen", 
-                                                      "Predominant_land_use:percNH",
-                                                      "Use_intensity:fert.total_log", 
-                                                      "Use_intensity:Hansen_mindist_log",
-                                                      "Use_intensity:landcovers.5k",
-                                                      "Use_intensity:homogen",
-                                                      "Use_intensity:percNH",
+                                fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
+                                                      "Predominant_land_use:poly(Hansen_mindist_log,1)",
+                                                      "Predominant_land_use:poly(landcovers.5k,1)", 
+                                                      "Predominant_land_use:poly(homogen,1)", 
+                                                      "Predominant_land_use:poly(percNH,1)",
+                                                      "Use_intensity:poly(fert.total_log,1)", 
+                                                      "Use_intensity:poly(Hansen_mindist_log,1)",
+                                                      "Use_intensity:poly(landcovers.5k,1)",
+                                                      "Use_intensity:poly(homogen,1)",
+                                                      "Use_intensity:poly(percNH,1)",
                                                       "Predominant_land_use:Use_intensity"), verbose = F)}) 
 # save the output
 save(sr_temp, file = paste0(outdir, "/SPECIESRICHNESS_Temperate_Model_selection.rdata"))
@@ -134,18 +135,23 @@ write.csv(sr_temp_stats, file = paste0(outdir, "/sr_temp_stats.csv"), row.names 
 summary(sr_trop$model)
 
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
-#  poly(fert.total_log, 1) + poly(homogen, 1) + homogen + percNH + landcovers.5k + fert.total_log +  
-#  Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log + Use_intensity:landcovers.5k + Use_intensity:percNH + 
-# (1 | SS) + (1 | SSB) +  (1 | SSBS)
+# poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(landcovers.5k, 1) + 
+# Predominant_land_use:poly(fert.total_log, 1) + Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + 
+# Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1) + 
+# (1 | SS) +      (1 | SSB) + (1 | SSBS)
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(homogen, 1) + homogen + percNH + landcovers.5k + fert.total_log +  Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log + Use_intensity:landcovers.5k + Use_intensity:percNH"
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(landcovers.5k, 1) + Predominant_land_use:poly(fert.total_log, 1) + Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1)"
 
 
 srmod_trop <- GLMER(modelData = final.data.trans_trop, responseVar = "Species_richness", fitFamily = "poisson",
                     fixedStruct = mod_struc,
                     randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
 
-
+# Warning messages:
+# 1: In optwrap(optimizer, devfun, start, rho$lower, control = control,  :
+# convergence code 1 from bobyqa: bobyqa -- maximum number of function evaluations exceeded
+# 2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :Model failed to converge with max|grad| = 0.00214943 (tol = 0.001, component 1)
+# take a look at the model output
 
 # take a look at the model output
 summary(srmod_trop$model)
@@ -164,26 +170,23 @@ save(srmod_trop, file = paste0(outdir, "/SRMOD_Tropical_output.rdata"))
 summary(sr_temp$model)
 
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + homogen + fert.total_log + percNH +
-# Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity +  
+# poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + 
+# Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH,1) + Predominant_land_use:Use_intensity +  
 # (1 | SS) + (1 | SSB) + (1 | SSBS)
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + homogen + fert.total_log + percNH + Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity"
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH,1) + Predominant_land_use:Use_intensity"
 
 srmod_temp <- GLMER(modelData = final.data.trans_temp, responseVar = "Species_richness", fitFamily = "poisson",
                     fixedStruct = mod_struc,
                     randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE)
 
 
-#fixed-effect model matrix is rank deficient so dropping 3 columns / coefficients
-#Warning messages:
+# Warning messages:
 # 1: In optwrap(optimizer, devfun, start, rho$lower, control = control,  :
 # convergence code 1 from bobyqa: bobyqa -- maximum number of function evaluations exceeded
 # 2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
-# Model failed to converge with max|grad| = 0.00979875 (tol = 0.001, component 1)
+# Model failed to converge with max|grad| = 0.0056377 (tol = 0.001, component 1)
 
-
-# take a look at the model output
 summary(srmod_temp$model)
 
 # extract the coefficents of the model

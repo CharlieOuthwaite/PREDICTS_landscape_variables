@@ -14,7 +14,7 @@ rm(list = ls())
 
 # load libraries
 library(devtools)
-install_github(repo = "timnewbold/StatisticalModels")
+#install_github(repo = "timnewbold/StatisticalModels")
 library(StatisticalModels)
 library(roquefort)
 library(cowplot)
@@ -85,16 +85,16 @@ system.time({ab_trop <- GLMERSelect(modelData = mod_dat,
                                   fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                   fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                   randomStruct = "(1|SS)+(1|SSB)", 
-                                  fixedInteractions = c("Predominant_land_use:fert.total_log", 
-                                                        "Predominant_land_use:Hansen_mindist_log", 
-                                                        "Predominant_land_use:landcovers.5k", 
-                                                        "Predominant_land_use:homogen", 
-                                                        "Predominant_land_use:percNH",
-                                                        "Use_intensity:fert.total_log", 
-                                                        "Use_intensity:Hansen_mindist_log", 
-                                                        "Use_intensity:landcovers.5k", 
-                                                        "Use_intensity:homogen",
-                                                        "Use_intensity:percNH",
+                                  fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
+                                                        "Predominant_land_use:poly(Hansen_mindist_log,1)", 
+                                                        "Predominant_land_use:poly(landcovers.5k,1)", 
+                                                        "Predominant_land_use:poly(homogen,1)", 
+                                                        "Predominant_land_use:poly(percNH,1)",
+                                                        "Use_intensity:poly(fert.total_log,1)", 
+                                                        "Use_intensity:poly(Hansen_mindist_log,1)", 
+                                                        "Use_intensity:poly(landcovers.5k,1)", 
+                                                        "Use_intensity:poly(homogen,1)",
+                                                        "Use_intensity:poly(percNH,1)",
                                                         "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
@@ -124,16 +124,16 @@ system.time({ab_temp <- GLMERSelect(modelData = mod_dat,
                                     fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
                                     fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
                                     randomStruct = "(1|SS)+(1|SSB)", 
-                                    fixedInteractions = c("Predominant_land_use:fert.total_log", 
-                                                          "Predominant_land_use:Hansen_mindist_log", 
-                                                          "Predominant_land_use:landcovers.5k", 
-                                                          "Predominant_land_use:homogen", 
-                                                          "Predominant_land_use:percNH",
-                                                          "Use_intensity:fert.total_log", 
-                                                          "Use_intensity:Hansen_mindist_log", 
-                                                          "Use_intensity:landcovers.5k", 
-                                                          "Use_intensity:homogen",
-                                                          "Use_intensity:percNH",
+                                    fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
+                                                          "Predominant_land_use:poly(Hansen_mindist_log,1)", 
+                                                          "Predominant_land_use:poly(landcovers.5k,1)", 
+                                                          "Predominant_land_use:poly(homogen,1)", 
+                                                          "Predominant_land_use:poly(percNH,1)",
+                                                          "Use_intensity:poly(fert.total_log,1)", 
+                                                          "Use_intensity:poly(Hansen_mindist_log,1)", 
+                                                          "Use_intensity:poly(landcovers.5k,1)", 
+                                                          "Use_intensity:poly(homogen,1)",
+                                                          "Use_intensity:poly(percNH,1)",
                                                           "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
@@ -169,7 +169,12 @@ summary(ab_trop$model)
 # Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k
 # + (1 | SS) + (1 | SSB)
 
-mod_struc <- "Forest_biome + Use_intensity + Predominant_land_use + poly(homogen, 1) + Hansen_mindist_log + landcovers.5k + Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k"
+# logAbun ~ Forest_biome + Predominant_land_use +  Use_intensity + 
+# poly(homogen, 1) + poly(Hansen_mindist_log, 1) + poly(landcovers.5k, 1) +
+# Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(landcovers.5k, 1) + 
+# (1 |SS) + (1 | SSB)
+
+mod_struc <- "Forest_biome + Use_intensity + Predominant_land_use + poly(homogen,1) + poly(Hansen_mindist_log,1) + poly(landcovers.5k,1) + Predominant_land_use:poly(Hansen_mindist_log,1) + Use_intensity:poly(landcovers.5k,1)"
 
 abmod_trop <- GLMER(modelData = final.data.trans_trop_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
                fixedStruct = mod_struc,
@@ -182,7 +187,7 @@ summary(abmod_trop$model)
 coefs_trop <- fixef(abmod_trop$model)
 
 # save the coefficients
-write.csv(coefs_trop, file = paste0(outdir, "/ABUNDANCE_Trop_coefs.csv"), row.names = F)
+write.csv(coefs_trop, file = paste0(outdir, "/ABUNDANCE_Trop_coefs.csv"), row.names = T)
 
 # save the model output
 save(abmod_trop, file = paste0(outdir, "/ABMOD_Tropical_output.rdata"))
@@ -194,12 +199,12 @@ save(abmod_trop, file = paste0(outdir, "/ABMOD_Tropical_output.rdata"))
 # 2. Temperate
 summary(ab_temp$model)
 
-# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + fert.total_log +
-# Use_intensity:fert.total_log + Predominant_land_use:Use_intensity + 
-# (1 | SS) + (1 | SSB)
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + fert.total_log + Use_intensity:fert.total_log + Predominant_land_use:Use_intensity"
+# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + 
+# Use_intensity:poly(fert.total_log,1) + Predominant_land_use:Use_intensity + (1 | SS) + (1 |      SSB)
+
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log,1) + poly(landcovers.5k,1) + poly(homogen,1) + poly(percNH,1) + Use_intensity:poly(fert.total_log,1) + Predominant_land_use:Use_intensity"
 
 abmod_temp <- GLMER(modelData = final.data.trans_temp_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
                     fixedStruct = mod_struc,
@@ -282,6 +287,7 @@ p1 <- plot(abmod_temp$model)
 pdf(NULL)
 dev.control(displaylist="enable")
 qqnorm(resid(abmod_temp$model), main = "")
+qqline(resid(abmod_temp$model))
 p2 <- recordPlot()
 invisible(dev.off())
 
