@@ -38,8 +38,8 @@ load(paste0(moddir, "/final.data.trans_temp_ABUN.rdata"))
 summary(abmod_trop$model)
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(homogen, 1) + Hansen_mindist_log + landcovers.5k + 
-# Predominant_land_use:Hansen_mindist_log + Use_intensity:landcovers.5k + 
+# poly(homogen, 1) + poly(Hansen_mindist_log, 1) + poly(landcovers.5k, 1) + 
+# Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(landcovers.5k, 1) + 
 # (1 | SS) + (1 | SSB)
 
 #### Land use ####
@@ -242,8 +242,8 @@ ggsave(filename = paste0(outdir, "/Tropical_Abun_nlandcovers.pdf"))
 
 #### homogeneity ####
 
-from = 0
-to = 1
+from = 0.2
+to = 0.7
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- NULL
@@ -411,8 +411,8 @@ ggsave(filename = paste0(outdir, "/Tropical_Abun_distLU.pdf"))
 summary(abmod_temp$model)
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen,1) + poly(percNH, 1) + fert.total_log + 
-# Use_intensity:fert.total_log +  Predominant_land_use:Use_intensity
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen,1) + poly(percNH, 1) +
+# Use_intensity:poly(fert.total_log, 1) +  Predominant_land_use:Use_intensity
 # (1 | SS) + (1 | SSB)
 
 #### Land use ####
@@ -565,8 +565,8 @@ ggsave(filename = paste0(outdir, "/Temperate_Abun_nlandcovers.pdf"))
 
 #### homogeneity ####
 
-from = 0
-to = 1
+from = 0.15
+to = 0.7
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- NULL

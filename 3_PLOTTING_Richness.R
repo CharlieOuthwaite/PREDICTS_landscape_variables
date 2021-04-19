@@ -49,10 +49,10 @@ final.data.trans_temp <- droplevels(final.data.trans_temp)
 summary(srmod_trop$model)
 
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity + 
-# poly(fert.total_log, 1) + poly(homogen, 1) + homogen + percNH +  landcovers.5k + fert.total_log + 
-# Predominant_land_use:homogen + Predominant_land_use:percNH + Predominant_land_use:fert.total_log +  
-# Use_intensity:landcovers.5k + Use_intensity:percNH + 
-# (1 |      SS) + (1 | SSB) + (1 | SSBS)
+# poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) +  poly(landcovers.5k, 1) + 
+# Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + Predominant_land_use:poly(fert.total_log, 1) +  
+# Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1) + 
+# (1 | SS) + (1 | SSB) + (1 | SSBS)
 
 
 #### Land use ####
@@ -204,8 +204,8 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_nlandcovers.pdf"))
 
 #### homogeneity ####
 
-from = 0
-to = 1
+from = 0.2
+to = 0.7
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- NULL
@@ -659,8 +659,8 @@ ggsave(filename = paste0(outdir, "/Tropical_Rich_percNHUI.pdf"))
 summary(srmod_temp$model)
 
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + homogen + fert.total_log + percNH +
-# Predominant_land_use:homogen + Use_intensity:fert.total_log + Use_intensity:percNH + Predominant_land_use:Use_intensity +  
+# poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + 
+# Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH, 1) + Predominant_land_use:Use_intensity +  
 # (1 | SS) + (1 | SSB) + (1 | SSBS)
 
 
@@ -922,8 +922,8 @@ ggsave(filename = paste0(outdir, "/Temperate_Rich_fert.pdf"))
 
 #### homogeneity ####
 
-from = 0
-to = 1
+from = 0.15
+to = 0.7
 vals <- seq(from = from, to = to, length.out = 1000)
 variable <- 'homogen'
 fac <- NULL
