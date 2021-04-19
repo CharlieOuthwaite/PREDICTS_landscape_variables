@@ -504,7 +504,7 @@ sites.sub_trop <- sites.sub[sites.sub$Tropical == "Tropical", ]
 pdf(file = paste0(outdir, "/Correlations_all_Trop.pdf"), width =14, height = 9)
 
 # correlations, including all nlandcovers buffers
-pairs(sites.sub_trop[ , c(21:34)], 
+pairs(sites.sub_trop[ , c(21:24, 26,27,32:34)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
@@ -516,7 +516,7 @@ sites.sub_temp <- sites.sub[sites.sub$Tropical == "Temperate", ]
 
 pdf(file = paste0(outdir, "/Correlations_all_Temp.pdf"), width =14, height = 9)
 # correlations, including all nlandcovers buffers
-pairs(sites.sub_temp[ , c(21:34)], 
+pairs(sites.sub_temp[ , c(21:24, 26,27,32:34)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
@@ -687,11 +687,16 @@ dev.off()
 length(unique(final.data.trans_trop$SS)) # 224 studies
 nrow(final.data.trans_trop) # 3719 sites
 
+length(unique(final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), "SS"])) # 202 studies
+nrow(final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ]) # 3314 sites
+
 # 2. Temperate
 
 length(unique(final.data.trans_temp$SS)) # 257 studies
 nrow(final.data.trans_temp) # 6674 sites
 
+length(unique(final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), "SS"])) # 228 studies
+nrow(final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ]) # 5740 sites
 
 
 ##%######################################################%##
