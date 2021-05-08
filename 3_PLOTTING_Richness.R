@@ -133,22 +133,23 @@ errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
 pdf(file = paste0(outdir, "/Tropical_RichLUUI.pdf"))
+par(mar=c(5,5,1,1))
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Species Richness (%)",xlab="",bty="l", cex.lab =1.4, cex.axis = 1.4)
+       ylab="Species Richness (%)",xlab="",bty="l", cex.lab =1.6, cex.axis = 1.6, cex = 1.5)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5, cex.axis =1.4)
+     padj = 0.5, cex.axis =1.6)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topright", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0), cex =1.4)
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex =1.8)
 
 dev.off()
 
@@ -403,8 +404,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_landcoversUI.pdf"))
@@ -463,8 +464,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.3,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_fertLU.pdf"))
@@ -523,9 +524,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.position = c(0.3,0.9), legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_homogenLU.pdf"))
@@ -584,9 +585,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.position = c(0.3,0.9), legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(),text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_percNHLU.pdf"))
@@ -645,8 +646,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.2,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 ggsave(filename = paste0(outdir, "/Tropical_Rich_percNHUI.pdf"))
 
@@ -743,22 +744,23 @@ errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
 pdf(file = paste0(outdir, "/Temperate_RichLUUI.pdf"))
+par(mar=c(5,5,1,1))
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Species Richness (%)",xlab="",bty="l", cex.lab = 1.4, cex.axis = 1.4)
+       ylab="Species Richness (%)",xlab="",bty="l", cex.lab =1.6, cex.axis = 1.6, cex = 1.5)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5, cex.axis = 1.4)
+     padj = 0.5, cex.axis = 1.6)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.4)
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.8)
 
 dev.off()
 
@@ -863,7 +865,7 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
-        aspect.ratio = 1) 
+        aspect.ratio = 1, text = element_text(size = 14)) 
 
 ggsave(filename = paste0(outdir, "/Temperate_Rich_dist.pdf"))
 
@@ -1019,9 +1021,9 @@ ggplot(data = result) +
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
-        legend.position = c(0.2,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.position = c(0.3,0.9), legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Temperate_Rich_homogenLU.pdf"))
@@ -1076,8 +1078,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.2), legend.title = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 
@@ -1136,8 +1138,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.2,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 6),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Temperate_Rich_percNHUI.pdf"))

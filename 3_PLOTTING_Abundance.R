@@ -120,23 +120,26 @@ resulta.lower <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.025))
 errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
+
+    
 pdf(file = paste0(outdir, "/Tropical_Abun_LUUI.pdf"))
+par(mar=c(5,5,1,1))
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(-50,50),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab =1.2, cex.axis = 1.2)
+       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab =1.6, cex.axis = 1.6, cex = 1.5)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5, cex.lab =1.2)
+     padj = 0.5, cex.axis =1.6)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.2)
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.8)
 
 dev.off()
 
@@ -283,7 +286,7 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
-        aspect.ratio = 1) 
+        aspect.ratio = 1, text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Abun_homogen.pdf"))
@@ -339,8 +342,8 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Tropical_Abun_landcoversUI.pdf"))
@@ -398,7 +401,7 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.3,0.85), legend.title = element_blank(),
-        legend.text = element_text(size = 9),
+        legend.text = element_text(size = 12),
         aspect.ratio = 1, legend.background = element_blank(),
         text = element_text(size = 14)) 
 
@@ -494,23 +497,24 @@ errbar.cols <- c(rep("#006400",3),rep("#8B0000", 3), rep("#EEAD0E", 3))
 
 
 pdf(file = paste0(outdir, "/Temperate_Abun_LUUI.pdf"))
+par(mar=c(5,5,1,1))
 
 
 errbar(x = 1:9,y = resulta.median,yplus = resulta.upper,yminus = resulta.lower,
        col=errbar.cols,errbar.col = errbar.cols,
        ylim=c(min(resulta.lower),max(resulta.upper)),xaxt="n",
        pch =rep(c(16,17,18), 3), 
-       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab = 1.2, cex.axis = 1.2)
+       ylab="Total Abundance (%)",xlab="",bty="l", cex.lab = 1.6, cex.axis = 1.6, cex = 1.5)
 
 axis(side = 1,at = c(2,5,8),
      labels = c("Primary \nvegetation","Secondary\nvegetation", "Cropland"),
-     padj = 0.5, cex= 1.2)
+     padj = 0.5, cex.axis= 1.6)
 
 abline(h=0,col="#00000077",lty=2)
 
 legend("topleft", 
        legend = c("Minimal Use", "Light Use", "Intense Use"),
-       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.2)
+       pch = c(16,17,18), bty = "n", inset=c(0,0), cex = 1.8)
 
 dev.off()
 
@@ -556,7 +560,7 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
-        aspect.ratio = 1) +
+        aspect.ratio = 1, text = element_text(size = 14)) +
   scale_x_continuous(breaks = c(seq(from = 0, to = 10, by = 2)))
 
 ggsave(filename = paste0(outdir, "/Temperate_Abun_nlandcovers.pdf"))
@@ -606,7 +610,7 @@ ggplot(data = result) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.8), legend.title = element_blank(),
-        aspect.ratio = 1) 
+        aspect.ratio = 1, text = element_text(size = 14)) 
 
 
 ggsave(filename = paste0(outdir, "/Temperate_Abun_homogen.pdf"))
@@ -760,8 +764,8 @@ result$factor <- pred_tab[, fac]
   theme_bw() +
   theme(panel.grid = element_blank(),
         legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank()) 
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(), text = element_text(size = 14)) 
 
 
 
