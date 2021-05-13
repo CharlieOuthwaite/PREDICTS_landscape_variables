@@ -19,6 +19,7 @@ library(StatisticalModels)
 # directories
 datadir <- '1_PREDICTS_PLUS_VARIABLES'
 moddir <- '2_MODEL_SELECTION'
+outdir <- '4_STATS_PROJECTIONS'
 
 # load model outputs - use the model selection versions as these include the stats in the model output
 load(paste0(moddir, "/SPECIESRICHNESS_Tropical_Model_selection.rdata"))
@@ -66,7 +67,7 @@ load(paste0(moddir, "/ABMOD_Temperate_output.rdata")) # abmod_trop
 
 
 
-# 1. Richness model, land use and use intensity combo - TROPICAL
+### 1. Richness model, land use and use intensity combo - TROPICAL
 
 
 # basic table of median values and reference factors
@@ -91,11 +92,30 @@ levels(pred_tab$Forest_biome) <- levels(srmod_trop$data$Forest_biome)[c(3, 2, 1)
 
 # add and change factor levels of land use and intensity
 
-pred_tab <- do.call("rbind", replicate(2, pred_tab, simplify = FALSE))
+pred_tab <- do.call("rbind", replicate(4, pred_tab, simplify = FALSE))
 
-
+#  cropland and intense use
 pred_tab[2, 'Predominant_land_use'] <- "Cropland"
 pred_tab[2, 'Use_intensity'] <- "Intense use"
+
+
+# fertiliser change
+# what is the range of interest
+fert1 <- 0 
+fert2 <- 500
+
+# rescale
+fert1_rescaled <- (log(fert1+1)-scalers[2,3])/scalers[2,2]
+fert2_rescaled <- (log(fert2+1)-scalers[2,3])/scalers[2,2]
+
+# add into the predictin matrix
+pred_tab[3, 3] <- fert1_rescaled
+pred_tab[4, 3] <- fert2_rescaled
+
+# change the use intensity
+pred_tab[3, 8] <- "Cropland"
+pred_tab[4, 8] <- "Cropland"
+
 
 # predict the result
 result <- PredictGLMER(model = srmod_trop$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
@@ -103,8 +123,9 @@ result <- PredictGLMER(model = srmod_trop$model, data = pred_tab, se.fit = TRUE,
 # transform the results
 result<- exp(result)
 
-result$LU <- c("Primary", "Cropland")
-result$UI <- c("Minimal", "Intense")
+result$LU <- c("Primary", "Cropland","Cropland", "Cropland")
+result$UI <- c("Minimal", "Intense", "Minimal", "Minimal")
+result$fert <- c("-", "-", 0, 500)
 
 # calculate percentage change
 
@@ -122,7 +143,8 @@ result$change <- NA
 
 
 # fill in differences
-result[2,6] <- perc_change(result[1,1], result[2,1])
+result[2,7] <- perc_change(result[1,1], result[2,1])
+result[4,7] <- perc_change(result[3,1], result[4,1])
 
 result$metric <- "SR"
 result$realm <- "Tropical"
@@ -132,7 +154,7 @@ write.csv(result, file = paste0(outdir, "/Predictions_Trop_richness.csv"), row.n
 
 
 
-# 2. Abundance model, non-tropical predictions
+### 2. Abundance model, non-tropical predictions
 
 # basic table of median values and reference factors
 pred_tab <- data.frame(landcovers.5k = median(final.data.trans_temp_ABUN$landcovers.5k),
@@ -259,7 +281,7 @@ write.csv(result, file = paste0(outdir, "/Predictions_Temp_abundance.csv"), row.
 
 
 
-# 3. Abundance model, tropical predictions
+### 3. Abundance model, tropical predictions
 
 # basic table of median values and reference factors
 pred_tab <- data.frame(landcovers.5k = median(final.data.trans_trop_ABUN$landcovers.5k),
@@ -355,6 +377,84 @@ write.csv(result, file = paste0(outdir, "/Predictions_Trop_abundance.csv"), row.
 
 
 
+
+
+### 4. Richness model, TEMPERATE
+
+
+# basic table of median values and reference factors
+pred_tab <- data.frame(landcovers.5k = median(final.data.trans_temp$landcovers.5k),
+                       homogen = median(final.data.trans_temp$homogen),
+                       fert.total_log = median(final.data.trans_temp$fert.total_log),
+                       percNH = median(final.data.trans_temp$percNH),
+                       Hansen_mindist_log =  median(final.data.trans_temp$Hansen_mindist_log),
+                       Forest_biome = "Temperate Broadleaf & Mixed Forests",
+                       Use_intensity = "Minimal use",
+                       Predominant_land_use = "Primary vegetation",
+                       #tempical = "Temperate",
+                       Species_richness = 0,
+                       logAbun = 0)
+
+
+levels(pred_tab$Predominant_land_use) <- levels(srmod_temp$data$Predominant_land_use)
+levels(pred_tab$Use_intensity) <- levels(srmod_temp$data$Use_intensity) 
+levels(pred_tab$Forest_biome) <- levels(srmod_temp$data$Forest_biome)
+
+
+
+# add and change factor levels of land use and intensity
+
+pred_tab <- do.call("rbind", replicate(3, pred_tab, simplify = FALSE))
+
+# distance change
+# what is the range of interest
+dist1 <- 0
+dist2 <- 10
+dist3 <- 20
+
+
+dist1_rescaled <- (log(dist1+1)-scalers[1,3])/scalers[1,2]
+dist2_rescaled <- (log(dist2+1)-scalers[1,3])/scalers[1,2]
+dist3_rescaled <- (log(dist3+1)-scalers[1,3])/scalers[1,2]
+
+pred_tab[1, "Hansen_mindist_log"] <- dist1_rescaled
+pred_tab[2, "Hansen_mindist_log"] <- dist2_rescaled
+pred_tab[3, "Hansen_mindist_log"] <- dist3_rescaled
+
+
+# predict the result
+result <- PredictGLMER(model = srmod_temp$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# transform the results
+result<- exp(result)
+
+
+result$dist <- c(0, 10, 20)
+
+# calculate percentage change
+
+# function to get percentage change from starting and ending values
+perc_change <- function(start, end){
+  
+  cng <- round(((end-start)/start)*100, 2)
+  return(cng)
+  
+}
+
+
+# add column for results
+result$change <- NA
+
+
+# fill in differences
+result[2,5] <- perc_change(result[1,1], result[2,1])
+result[3,5] <- perc_change(result[1,1], result[3,1])
+
+result$metric <- "SR"
+result$realm <- "Non_tropical"
+
+# save result table
+write.csv(result, file = paste0(outdir, "/Predictions_Temp_richness.csv"), row.names = F)
 
 
 
