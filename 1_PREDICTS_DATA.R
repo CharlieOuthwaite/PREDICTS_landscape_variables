@@ -18,6 +18,7 @@ library(ggplot2)
 library(raster)
 library(BioStatR)
 library(ggthemes)
+library(dplyr)
 
 
 # set the data folder
@@ -37,8 +38,66 @@ predicts <- CorrectSamplingEffort(pred.data)
 # merge sites: this combines potential subsamples within one site
 predicts <- MergeSites(predicts) # 2906994 rows
 
+# assign sites to major groups based on Phylum/Class
+predicts$group <- NA
+
+predicts[predicts$Class == "Aves", "group"] <- "Birds"
+predicts[predicts$Class == "Mammalia", "group"] <- "Mammals"
+predicts[predicts$Class == "Amphibia", "group"] <- "Amphibians"
+predicts[predicts$Class == "Reptilia", "group"] <- "Reptiles"
+
+predicts[predicts$Kingdom == "Plantae", "group"] <- "Plants"
+
+predicts[predicts$Kingdom == "Fungi", "group"] <- "Fungi_SlimeMoulds"
+
+predicts[predicts$Kingdom == "Protozoa", "group"] <- "Protozoa"
+
+predicts[predicts$Phylum == "Arthropoda", "group"] <- "Inverts"
+predicts[predicts$Phylum == "Annelida", "group"] <- "Inverts"
+predicts[predicts$Phylum == "Mollusca", "group"] <- "Inverts"
+predicts[predicts$Phylum == "Nematoda", "group"] <- "Inverts"
+predicts[predicts$Phylum == "Platyhelminthes", "group"] <- "Inverts"
+predicts[predicts$Phylum == "Onychophora", "group"] <- "Inverts"
+
+predicts[predicts$Phylum == "Mycetozoa", "group"] <- "Fungi_SlimeMoulds"
+predicts[predicts$Phylum == "Ascomycota", "group"] <- "Fungi_SlimeMoulds"
+predicts[predicts$Phylum == "Basidiomycota", "group"] <- "Fungi_SlimeMoulds"
+predicts[predicts$Phylum == "Glomeromycota", "group"] <- "Fungi_SlimeMoulds"
+
+table(predicts[is.na(predicts$group), "Phylum"])
+table(predicts[is.na(predicts$group), "Class"])
+View(predicts[is.na(predicts$group), ]) # 144 rows, no info in lower taxonomic columns
+
+# remove those with no info
+predicts <- predicts[!is.na(predicts$group), ] # 2906850 rows
+
+
+# check whether sites sample more than one group 
+group_count <- as.data.frame.matrix(table(predicts$SSBS, predicts$group))
+group_count[group_count >= 1] <- 1
+group_count$SSBS <- rownames(group_count)
+
+
+group_count <- cbind(group_count$SSBS, group_count[, 1:7] %>% mutate(sum = rowSums(.)))
+summary(group_count$sum)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 1.000   1.000   1.000   1.091   1.000   5.000 
+
+# some sites look at more than one group, combine these into a "Multiple" group
+multiple <- group_count[group_count$sum > 1, 1]
+
+predicts[predicts$SSBS %in% multiple, 'group'] <- "Multiple"
+table(predicts$group)
+
+# Amphibians             Birds Fungi_SlimeMoulds           Inverts           Mammals          Multiple 
+#       5518            393328             88104            902233             24626            233194 
+
+#  Plants          Reptiles 
+# 1255274              4573 
+
+
 # Calculate site level metrics
-pred.sites.metrics <- SiteMetrics(predicts, extra.cols = c("Predominant_land_use", "SSB", "SSBS")) # 22678 rows
+pred.sites.metrics <- SiteMetrics(predicts, extra.cols = c("Predominant_land_use", "SSB", "SSBS", "group")) # 22678 rows
 
 ### only interested in natural habitats plus cropland, drop other land uses ###
 
@@ -48,6 +107,8 @@ sites.sub <- pred.sites.metrics[!pred.sites.metrics$Predominant_land_use %in% c(
 # remove sites with NA in lat/long columns
 sites.sub <- sites.sub[!is.na(sites.sub$Longitude),  ] # 15612 rows
 
+# save site level data which now includes group
+save(sites.sub, file = paste0(outdir, "/sites_sub_inc_group.rdata"))
 
 
 ############################################################
@@ -421,6 +482,9 @@ sites.sub$Tropical <- as.factor(sites.sub$Tropical)
 
 table(sites.sub$Tropical)
 
+# Temperate  Tropical 
+# 7203      4973 
+
 ##%######################################################%##
 #                                                          #
 ####                 Assess the dataset                 ####
@@ -532,7 +596,7 @@ dev.off()
 ##%######################################################%##
 
 # subset columns
-final.data <- sites.sub[, c(1,8:10, 14:35)]
+final.data <- sites.sub[, c(1,8:10, 14:36)]
 
 final.data.trans <- final.data
 
