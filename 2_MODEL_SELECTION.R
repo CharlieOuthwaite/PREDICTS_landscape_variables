@@ -273,6 +273,10 @@ tab_model(abmod_trop$model, transform = NULL, file = paste0(outdir, "/AB_Trop_ou
 tab_model(abmod_temp$model, transform = NULL, file = paste0(outdir, "/AB_Temp_output_table.html"))
 
 
+# combined table for paper
+
+tab_model(abmod_trop$model, abmod_temp$model, transform = NULL, file = paste0(outdir, "/Table1_Abundance.html"), 
+          show.icc = F, show.obs = F, show.ngroups = F, show.ci = F)
 
 
 ##%######################################################%##

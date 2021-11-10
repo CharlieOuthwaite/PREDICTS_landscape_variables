@@ -249,6 +249,11 @@ tab_model(srmod_trop$model, transform = NULL, file = paste0(outdir, "/SR_Trop_ou
 tab_model(srmod_temp$model, transform = NULL, file = paste0(outdir, "/SR_Temp_output_table.html"))
 
 
+# combined table for paper
+
+tab_model(srmod_trop$model, srmod_temp$model, transform = NULL, file = paste0(outdir, "/Table1_Richness.html"), 
+          show.icc = F, show.obs = F, show.ngroups = F, show.ci = F)
+
 ##%######################################################%##
 #                                                          #
 ####                    Model checks                    ####
