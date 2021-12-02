@@ -70,7 +70,7 @@ save(final.data.trans_temp_ABUN, file = paste0(outdir, "/final.data.trans_temp_A
 #### 1. Tropical subset ####
 
 # separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_trop_ABUN
+mod_dat <- final.data.trans_trop_ABUN[, c(1:2, 5:8, 12, 27:35)]
 
 
 # check for NAs in other columns
@@ -81,18 +81,18 @@ system.time({ab_trop <- GLMERSelect(modelData = mod_dat,
                                   responseVar = "logAbun",
                                   fitFamily = "gaussian", 
                                   fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
-                                  fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
-                                  randomStruct = "(1|SS)+(1|SSB)+(1|group)", 
-                                  fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
-                                                        "Predominant_land_use:poly(Hansen_mindist_log,1)", 
-                                                        "Predominant_land_use:poly(landcovers.5k,1)", 
-                                                        "Predominant_land_use:poly(homogen,1)", 
-                                                        "Predominant_land_use:poly(percNH,1)",
-                                                        "Use_intensity:poly(fert.total_log,1)", 
-                                                        "Use_intensity:poly(Hansen_mindist_log,1)", 
-                                                        "Use_intensity:poly(landcovers.5k,1)", 
-                                                        "Use_intensity:poly(homogen,1)",
-                                                        "Use_intensity:poly(percNH,1)",
+                                  fixedTerms = list(fert.total_logRS = 1, Hansen_mindist_logRS = 1, landcovers.5kRS = 1, homogenRS = 1, percNHRS = 1),
+                                  randomStruct = "(1|SS)+(1|SSB)", 
+                                  fixedInteractions = c("Predominant_land_use:poly(fert.total_logRS,1)", 
+                                                        "Predominant_land_use:poly(Hansen_mindist_logRS,1)", 
+                                                        "Predominant_land_use:poly(landcovers.5kRS,1)", 
+                                                        "Predominant_land_use:poly(homogenRS,1)", 
+                                                        "Predominant_land_use:poly(percNHRS,1)",
+                                                        "Use_intensity:poly(fert.total_logRS,1)", 
+                                                        "Use_intensity:poly(Hansen_mindist_logRS,1)", 
+                                                        "Use_intensity:poly(landcovers.5kRS,1)", 
+                                                        "Use_intensity:poly(homogenRS,1)",
+                                                        "Use_intensity:poly(percNHRS,1)",
                                                         "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
@@ -100,12 +100,13 @@ summary(ab_trop$model)
 
 # selected model
 
-# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity + poly(homogen, 1) + poly(Hansen_mindist_log, 1) + poly(landcovers.5k, 1)
+# logAbun ~ Predominant_land_use + Forest_biome + Use_intensity + 
+# poly(homogen, 1) + poly(Hansen_mindist_log, 1) + poly(landcovers.5k, 1)
 # Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(landcovers.5k, 1) +  
-#  + (1 | SS) + (1 | SSB) + (1 | group)
+#  + (1 | SS) + (1 | SSB) 
 
 # save the output
-save(ab_trop, file = paste0(outdir, "/ABUNDANCE_Tropical_Model_Selection_incgroup.rdata"))
+save(ab_trop, file = paste0(outdir, "/ABUNDANCE_Tropical_Model_Selection.rdata"))
 
 # extract the stats produced as part of the model selection process
 ab_trop_stats <- as.data.frame(ab_trop$stats)
@@ -119,25 +120,25 @@ write.csv(ab_trop_stats, file = paste0(outdir, "/ab_Trop_stats.csv"), row.names 
 #### 2. Temperate subset ####
 
 # separate out the data where abundance column is not NA
-mod_dat <- final.data.trans_temp_ABUN
+mod_dat <- final.data.trans_temp_ABUN[, c(1:2, 5:8, 12, 27:35)]
 
 # run the model selection process
 system.time({ab_temp <- GLMERSelect(modelData = mod_dat, 
                                     responseVar = "logAbun",
                                     fitFamily = "gaussian", 
                                     fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
-                                    fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
-                                    randomStruct = "(1|SS)+(1|SSB)+(1|group)", 
-                                    fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
-                                                          "Predominant_land_use:poly(Hansen_mindist_log,1)", 
-                                                          "Predominant_land_use:poly(landcovers.5k,1)", 
-                                                          "Predominant_land_use:poly(homogen,1)", 
-                                                          "Predominant_land_use:poly(percNH,1)",
-                                                          "Use_intensity:poly(fert.total_log,1)", 
-                                                          "Use_intensity:poly(Hansen_mindist_log,1)", 
-                                                          "Use_intensity:poly(landcovers.5k,1)", 
-                                                          "Use_intensity:poly(homogen,1)",
-                                                          "Use_intensity:poly(percNH,1)",
+                                    fixedTerms = list(fert.total_logRS = 1, Hansen_mindist_logRS = 1, landcovers.5kRS = 1, homogenRS = 1, percNHRS = 1),
+                                    randomStruct = "(1|SS)+(1|SSB)", 
+                                    fixedInteractions = c("Predominant_land_use:poly(fert.total_logRS,1)", 
+                                                          "Predominant_land_use:poly(Hansen_mindist_logRS,1)", 
+                                                          "Predominant_land_use:poly(landcovers.5kRS,1)", 
+                                                          "Predominant_land_use:poly(homogenRS,1)", 
+                                                          "Predominant_land_use:poly(percNHRS,1)",
+                                                          "Use_intensity:poly(fert.total_logRS,1)", 
+                                                          "Use_intensity:poly(Hansen_mindist_logRS,1)", 
+                                                          "Use_intensity:poly(landcovers.5kRS,1)", 
+                                                          "Use_intensity:poly(homogenRS,1)",
+                                                          "Use_intensity:poly(percNHRS,1)",
                                                           "Predominant_land_use:Use_intensity"), verbose = F)})
 
 # take a look at the model output
@@ -145,12 +146,12 @@ summary(ab_temp$model)
 
 # selected model:
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(Hansen_mindist_log, 1) +
-# Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(fert.total_log, 1) + Predominant_land_use:Use_intensity +  
-# (1 | SS) + (1 | SSB) + (1 | group)
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + 
+# Use_intensity:poly(fert.total_log, 1) + Predominant_land_use:Use_intensity +  
+# (1 | SS) + (1 | SSB)
 
 # save the output
-save(ab_temp, file = paste0(outdir, "/ABUNDANCE_Temperate_Model_Selection_incgroup.rdata"))
+save(ab_temp, file = paste0(outdir, "/ABUNDANCE_Temperate_Model_Selection.rdata"))
 
 # extract the stats produced as part of the model selection process
 ab_temp_stats <- as.data.frame(ab_temp$stats)
@@ -180,11 +181,14 @@ summary(ab_trop$model)
 #  + (1 | SS) + (1 | SSB) + (1 | group)
 
 
-mod_struc <- "Forest_biome + Use_intensity + Predominant_land_use + poly(homogen,1) + poly(Hansen_mindist_log,1) + poly(landcovers.5k,1) + Predominant_land_use:poly(Hansen_mindist_log,1) + Use_intensity:poly(landcovers.5k,1)"
+mod_struc <- "Forest_biome + Use_intensity + Predominant_land_use + poly(homogenRS,1) + poly(Hansen_mindist_logRS,1) + poly(landcovers.5kRS,1) + Predominant_land_use:poly(Hansen_mindist_logRS,1) + Use_intensity:poly(landcovers.5kRS,1)"
 
-abmod_trop <- GLMER(modelData = final.data.trans_trop_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
+mod_dat <- final.data.trans_trop_ABUN[, c(1:2, 5:8, 12, 27:35)]
+
+
+abmod_trop <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
                fixedStruct = mod_struc,
-               randomStruct = "(1|SS) + (1|SSB) + (1 | group)", REML = TRUE)
+               randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output
 summary(abmod_trop$model)
@@ -207,16 +211,18 @@ summary(ab_temp$model)
 
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(Hansen_mindist_log, 1) +
-# Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(fert.total_log, 1) + Predominant_land_use:Use_intensity +  
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen, 1) + poly(percNH, 1) +
+# Use_intensity:poly(fert.total_log, 1) + Predominant_land_use:Use_intensity +  
 # (1 | SS) + (1 | SSB) + (1 | group)
 
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_log,1) + poly(landcovers.5k,1) + poly(homogen,1) + poly(percNH,1) + poly(Hansen_mindist_log, 1)+ Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(fert.total_log,1) + Predominant_land_use:Use_intensity"
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity +  poly(fert.total_logRS,1) + poly(landcovers.5kRS,1) + poly(homogenRS,1) + poly(percNHRS,1) + Use_intensity:poly(fert.total_logRS,1) + Predominant_land_use:Use_intensity"
 
-abmod_temp <- GLMER(modelData = final.data.trans_temp_ABUN, responseVar = "logAbun", fitFamily = "gaussian",
+mod_dat <- final.data.trans_temp_ABUN[, c(1:2, 5:8, 12, 27:35)]
+
+abmod_temp <- GLMER(modelData = mod_dat, responseVar = "logAbun", fitFamily = "gaussian",
                     fixedStruct = mod_struc,
-                    randomStruct = "(1|SS) + (1|SSB) + (1 | group)", REML = TRUE)
+                    randomStruct = "(1|SS) + (1|SSB)", REML = TRUE)
 
 # take a look at the model output
 summary(abmod_temp$model)
@@ -269,8 +275,8 @@ write.csv(result, file = paste0(outdir, "/Rsquareds_Abun.csv"))
 
 # save model output tables
 
-tab_model(abmod_trop$model, transform = NULL, file = paste0(outdir, "/AB_Trop_output_table.html"))
-tab_model(abmod_temp$model, transform = NULL, file = paste0(outdir, "/AB_Temp_output_table.html"))
+tab_model(abmod_trop$model, transform = NULL, file = paste0(outdir, "/AB_Trop_nestedgrp_output_table.html"))
+tab_model(abmod_temp$model, transform = NULL, file = paste0(outdir, "/AB_Temp_nestedgrp_output_table.html"))
 
 
 # combined table for paper
@@ -324,7 +330,7 @@ summary(ab_test)
 # percentage of studies that show spatial autocorrelation?
 perc_auto <- (length(which(ab_test$P<0.05))/length(ab_test$P))*100
 
-# 8.6%
+# 8.2%
 
 ab_test_vals <- as.data.frame(ab_test$P)
 ab_test_vals$`ab_test$P` <- round(ab_test_vals$`ab_test$P`, digits = 4)
@@ -344,7 +350,7 @@ p3 <- ggplot(data = ab_test_vals ) +
 
 
 cowplot::plot_grid(p1,p2,p3,
-          labels = c("A.", "B.", "C."))
+          labels = c("a.", "b.", "c."), nrow = 2)
 
 
 ggsave(file = paste0(outdir, "/Abun_Temperate_model_checks_plots.pdf"), height = 9, width = 9)
@@ -388,7 +394,7 @@ summary(ab_test)
 # percentage of studies that show spatial autocorrelation?
 perc_auto <- (length(which(ab_test$P<0.05))/length(ab_test$P))*100
 
-# 8.5%
+# 8.4%
 
 ab_test_vals <- as.data.frame(ab_test$P)
 ab_test_vals$`ab_test$P` <- round(ab_test_vals$`ab_test$P`, digits = 4)
@@ -408,7 +414,7 @@ p3 <- ggplot(data = ab_test_vals ) +
 
 
 cowplot::plot_grid(p1,p2,p3,
-                   labels = c("A.", "B.", "C."))
+                   labels = c("a.", "b.", "c."))
 
 
 ggsave(file = paste0(outdir, "/Abun_Tropical_model_checks_plots.pdf"), height = 9, width = 9)

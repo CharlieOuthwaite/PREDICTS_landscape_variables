@@ -40,7 +40,7 @@ summary(abmod_trop$model)
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
 # poly(homogen, 1) + poly(Hansen_mindist_log, 1) + poly(landcovers.5k, 1) + 
 # Predominant_land_use:poly(Hansen_mindist_log, 1) + Use_intensity:poly(landcovers.5k, 1) + 
-# (1 | SS) + (1 | SSB)
+# (1 | SS) + (1 | SSB) + (1 | group)
 
 #### Land use ####
 PlotGLMERFactor(model = abmod_trop$model,data = abmod_trop$data,
@@ -414,9 +414,10 @@ ggsave(filename = paste0(outdir, "/Tropical_Abun_distLU.pdf"))
 summary(abmod_temp$model)
 
 # logAbun ~ Predominant_land_use + Forest_biome + Use_intensity +  
-# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen,1) + poly(percNH, 1) +
+# poly(fert.total_log, 1) + poly(landcovers.5k, 1) + poly(homogen,1) + poly(percNH, 1) + poly(Hansen_mindist_log, 1) +
+# Predominant_land_use:poly(Hansen_mindist_log,  1) + 
 # Use_intensity:poly(fert.total_log, 1) +  Predominant_land_use:Use_intensity
-# (1 | SS) + (1 | SSB)
+# (1 | SS) + (1 | SSB) + (1 | group)
 
 #### Land use ####
 PlotGLMERFactor(model = abmod_temp$model,data = abmod_temp$data,
@@ -553,7 +554,7 @@ result <- exp(result)-1
 ggplot(data = result) +
   geom_line(aes(x = vals, y = y), col = c("#CD950C")) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus), fill = c("#CD950C"), alpha = 0.3) +
-  ylim(c(0,250)) +
+  ylim(c(0,350)) +
   xlim(c(0, 11)) +
   xlab("Number of Landcovers") +
   ylab("Total Abundance") +
@@ -655,7 +656,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y), col = c("#66CD00")) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus), fill = c("#66CD00"), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1), size = 0.1) +
-  ylim(c(0,350)) +
+  ylim(c(0,400)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
   ylab("Total Abundance") +
@@ -666,6 +667,54 @@ ggplot(data = result) +
 
 ggsave(filename = paste0(outdir, "/Temperate_Abun_percNH.pdf"))
 
+
+#### Distance to forest ####
+
+from = 0
+to = max(final.data.trans_temp_ABUN$Hansen_mindist)
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'Hansen_mindist_log'
+fac <- NULL
+n <- NULL
+logval = TRUE
+
+
+# organise the data
+pred_tab <- sort_data(modout = abmod_temp,
+                      moddata = final.data.trans_temp_ABUN,
+                      scalers = scalers,
+                      from = from, 
+                      to = to,
+                      vals = vals, 
+                      variable = variable,
+                      fac = fac, 
+                      n = n, 
+                      log = logval)
+
+# predict the result
+result <- PredictGLMER(model = abmod_temp$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# transform the results
+result <- exp(result)-1
+
+## organise data for plotting ##
+
+
+# SR plot = full range
+ggplot(data = result) +
+  geom_line(aes(x = vals, y = y), col = c("#458B00")) +
+  geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus), fill = c("#458B00"), alpha = 0.3) +
+  geom_rug(data = final.data.trans_trop_ABUN, aes(x = Hansen_mindist), size = 0.1) +
+  ylim(c(0, 350)) +
+  xlim(c(0, 100)) +
+  xlab("Distance to Forest (Km)") +
+  ylab("Total Abundance") +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = c(0.8,0.8), legend.title = element_blank(),
+        aspect.ratio = 1) 
+
+ggsave(filename = paste0(outdir, "/Temperate_Abun_dist.pdf"))
 
 
 
@@ -716,6 +765,67 @@ ggplot(data = result) +
 ggsave(filename = paste0(outdir, "/Temperate_Abun_fert.pdf"))
 
 
+
+#### distance by LU ####
+
+
+from = 0
+to = 80
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'Hansen_mindist_log'
+fac <- 'Predominant_land_use'
+n <- 3
+logval = TRUE
+
+
+
+# organise the data
+pred_tab <- sort_data(modout = abmod_temp,
+                      moddata = final.data.trans_temp_ABUN,
+                      scalers = scalers,
+                      from = from, 
+                      to = to,
+                      vals = vals, 
+                      variable = variable,
+                      fac = fac, 
+                      n = n,
+                      logval = logval)
+
+# predict the result
+result <- PredictGLMER(model = abmod_temp$model, data = pred_tab, se.fit = TRUE, seMultiplier = 1.96)
+
+# transform the results
+result <- exp(result)-1
+
+
+## organise data for plotting ##
+
+# add the new vals
+result$vals <- rep(vals, n)
+result$factor <- pred_tab[, fac]
+
+# SR plot = full range
+ggplot(data = result) +
+  geom_line(aes(x = vals, y = y, col = factor)) +
+  geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
+  geom_rug(data = final.data.trans_temp_ABUN, aes(x = Hansen_mindist, col = Predominant_land_use), size = 0.1) +
+  ylim(c(0,350)) +
+  xlim(c(0, 100)) +
+  xlab("Distance to Forest (Km)") +
+  ylab("Total Abundance") +
+  scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"))+
+  scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = c(0.3,0.85), legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        aspect.ratio = 1, legend.background = element_blank(),
+        text = element_text(size = 14)) 
+
+ggsave(filename = paste0(outdir, "/Temperate_Abun_distLU.pdf"))
+
+
+
 #### Fertilier, by use intensity ####
 
 from = 0
@@ -755,7 +865,7 @@ result$factor <- pred_tab[, fac]
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = final.data.trans_temp_ABUN, aes(x = fert.total, col = Use_intensity), size = 0.1) +
-  ylim(c(0,300)) +
+  ylim(c(0,350)) +
   xlim(c(0, 3000)) +
   xlab("Total fertiliser application (Kgs)") +
   ylab("Total Abundance") +

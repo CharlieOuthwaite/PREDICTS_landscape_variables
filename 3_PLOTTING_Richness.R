@@ -16,8 +16,8 @@ moddir <- '2_MODEL_SELECTION'
 outdir <- '3_PLOTTING'
 
 # load the selected models
-load(paste0(moddir, "/SRMOD_Tropical_output.rdata"))
-load(paste0(moddir, "/SRMOD_Temperate_output.rdata"))
+load(paste0(moddir, "/SRMOD_Tropical_output_incgroup.rdata"))
+load(paste0(moddir, "/SRMOD_Temperate_output_incgroup.rdata"))
 
 # read in the values used for rescaling
 scalers <- read.csv("1_PREDICTS_PLUS_VARIABLES/Scaling_values.csv")
@@ -52,7 +52,7 @@ summary(srmod_trop$model)
 # poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) +  poly(landcovers.5k, 1) + 
 # Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + Predominant_land_use:poly(fert.total_log, 1) +  
 # Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1) + 
-# (1 | SS) + (1 | SSB) + (1 | SSBS)
+# (1 | SS) + (1 | SSB) + (1 | SSBS) + (1 | group)
 
 
 #### Land use ####
@@ -516,7 +516,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = homogen, aes(x = V1, col = Predominant_land_use), size = 0.1) +
-  ylim(c(0,20)) +
+  ylim(c(0,30)) +
   xlim(c(0, 1)) +
   xlab("Homogeneity") +
   ylab("Species Richness") +
@@ -662,7 +662,7 @@ summary(srmod_temp$model)
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
 # poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + 
 # Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH, 1) + Predominant_land_use:Use_intensity +  
-# (1 | SS) + (1 | SSB) + (1 | SSBS)
+# (1 | SS) + (1 | SSB) + (1 | SSBS) + (1 | group)
 
 
 #### Land use ####
@@ -700,8 +700,7 @@ pred_tab <- data.frame(landcovers.5k = median(final.data.trans_temp$landcovers.5
                        Predominant_land_use = "Primary vegetation",
                        #Tropical = "Temperate",
                        Species_richness = 0,
-                       logAbun = 0, 
-                       RCAR_110km = 0)
+                       logAbun = 0)
 
 
 # organise factor levels
@@ -816,9 +815,6 @@ ggplot(data = result) +
 
 
 ggsave(filename = paste0(outdir, "/Temperate_Rich_percNH.pdf"))
-
-
-
 
 
 #### Distance to forest ####
@@ -1129,7 +1125,7 @@ ggplot(data = result) +
   geom_line(aes(x = vals, y = y, col = factor)) +
   geom_ribbon(aes(x = vals, ymin= yminus, ymax = yplus, fill = factor), alpha = 0.3) +
   geom_rug(data = percNH, aes(x = V1, col = Use_intensity), size = 0.1) +
-  ylim(c(0,25)) +
+  ylim(c(0,50)) +
   xlim(c(0, 100)) +
   xlab("Percentage of Natural Habitat") +
   ylab("Species Richness") +

@@ -73,20 +73,20 @@ predicts <- predicts[!is.na(predicts$group), ] # 2906850 rows
 
 
 # check whether sites sample more than one group 
-group_count <- as.data.frame.matrix(table(predicts$SSBS, predicts$group))
+group_count <- as.data.frame.matrix(table(predicts$SS, predicts$group))
 group_count[group_count >= 1] <- 1
-group_count$SSBS <- rownames(group_count)
+group_count$SS<- rownames(group_count)
 
 
-group_count <- cbind(group_count$SSBS, group_count[, 1:7] %>% mutate(sum = rowSums(.)))
+group_count <- cbind(group_count$SS, group_count[, 1:7] %>% mutate(sum = rowSums(.)))
 summary(group_count$sum)
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 1.000   1.000   1.000   1.091   1.000   5.000 
+# 1.000   1.000   1.000   1.077   1.000   5.000 
 
 # some sites look at more than one group, combine these into a "Multiple" group
 multiple <- group_count[group_count$sum > 1, 1]
 
-predicts[predicts$SSBS %in% multiple, 'group'] <- "Multiple"
+predicts[predicts$SS %in% multiple, 'group'] <- "Multiple"
 table(predicts$group)
 
 # Amphibians             Birds Fungi_SlimeMoulds           Inverts           Mammals          Multiple 
@@ -113,7 +113,7 @@ save(sites.sub, file = paste0(outdir, "/sites_sub_inc_group.rdata"))
 
 ############################################################
 #                                                          #
-#      Step 2: Subset data to those in forest biomes       #
+####  Step 2: Subset data to those in forest biomes     ####
 #                                                          #
 ############################################################
 
@@ -226,7 +226,7 @@ sites.sub$Forest_biome <- factor(sites.sub$Forest_biome,
 
 ############################################################
 #                                                          #
-#     Step 3: Input the production and fertiliser          #
+####    Step 3: Input the production and fertiliser     ####
 #                 intensity information                    #
 #                                                          #
 ############################################################
@@ -606,19 +606,19 @@ final.data.trans$fert.total_log <-log(final.data.trans$fert.total+1) # there are
 final.data.trans$Hansen_mindist_log <-log(final.data.trans$Hansen_mindist+1) # there are 0s so +1
 
 # standardise all continuous variables
-final.data.trans$landcovers.5k <- scale(final.data.trans$landcovers.5k)
-final.data.trans$homogen <- scale(final.data.trans$homogen)
-final.data.trans$fert.total_log <- scale(final.data.trans$fert.total_log)
-final.data.trans$Hansen_mindist_log <-scale(final.data.trans$Hansen_mindist_log)
-final.data.trans$percNH <-scale(final.data.trans$percNH)
+final.data.trans$landcovers.5kRS <- scale(final.data.trans$landcovers.5k)
+final.data.trans$homogenRS <- scale(final.data.trans$homogen)
+final.data.trans$fert.total_logRS <- scale(final.data.trans$fert.total_log)
+final.data.trans$Hansen_mindist_logRS <-scale(final.data.trans$Hansen_mindist_log)
+final.data.trans$percNHRS <-scale(final.data.trans$percNH)
 
 
 # get data sections for the scaling info for plotting later
-Hansen_mindist_log <-final.data.trans$Hansen_mindist_log
-landcovers.5k <- final.data.trans$landcovers.5k
-fert.total_log <- final.data.trans$fert.total_log
-homogen <- final.data.trans$homogen
-percNH <- final.data.trans$percNH
+Hansen_mindist_log <-final.data.trans$Hansen_mindist_logRS
+landcovers.5k <- final.data.trans$landcovers.5kRS
+fert.total_log <- final.data.trans$fert.total_logRS
+homogen <- final.data.trans$homogenRS
+percNH <- final.data.trans$percNHRS
 
 
 # save the scaling values for projections
