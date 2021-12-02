@@ -35,11 +35,11 @@ final.data.trans <- droplevels(final.data.trans)
 # Split the dataset based on realm
 
 final.data.trans_trop <- final.data.trans[final.data.trans$Tropical == "Tropical", ]
-nrow(final.data.trans_trop)
+nrow(final.data.trans_trop) # 3719
 final.data.trans_trop <- droplevels(final.data.trans_trop)
 
 final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperate", ]
-nrow(final.data.trans_temp)
+nrow(final.data.trans_temp) # 6674
 final.data.trans_temp <- droplevels(final.data.trans_temp)
 
 
@@ -54,26 +54,27 @@ final.data.trans_temp <- droplevels(final.data.trans_temp)
 #### 1. Tropical subset ####
 
 # run the model selection process
+mod_dat <- final.data.trans_trop[, c(1:2, 5:8, 11:12, 30:34)]
 
-system.time({sr_trop <- GLMERSelect(modelData = final.data.trans_trop, 
+system.time({sr_trop <- GLMERSelect(modelData = mod_dat, 
                                 responseVar = "Species_richness",
                                 fitFamily = "poisson", 
                                 fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
-                                fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
-                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)+(1|group)", 
-                                fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
-                                                      "Predominant_land_use:poly(Hansen_mindist_log,1)",
-                                                      "Predominant_land_use:poly(landcovers.5k,1)", 
-                                                      "Predominant_land_use:poly(homogen,1)", 
-                                                      "Predominant_land_use:poly(percNH,1)",
-                                                      "Use_intensity:poly(fert.total_log,1)", 
-                                                      "Use_intensity:poly(Hansen_mindist_log,1)",
-                                                      "Use_intensity:poly(landcovers.5k,1)",
-                                                      "Use_intensity:poly(homogen,1)",
-                                                      "Use_intensity:poly(percNH,1)",
+                                fixedTerms = list(fert.total_logRS = 1, Hansen_mindist_logRS = 1, landcovers.5kRS = 1, homogenRS = 1, percNHRS = 1),
+                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)", 
+                                fixedInteractions = c("Predominant_land_use:poly(fert.total_logRS,1)", 
+                                                      "Predominant_land_use:poly(Hansen_mindist_logRS,1)",
+                                                      "Predominant_land_use:poly(landcovers.5kRS,1)", 
+                                                      "Predominant_land_use:poly(homogenRS,1)", 
+                                                      "Predominant_land_use:poly(percNHRS,1)",
+                                                      "Use_intensity:poly(fert.total_logRS,1)", 
+                                                      "Use_intensity:poly(Hansen_mindist_logRS,1)",
+                                                      "Use_intensity:poly(landcovers.5kRS,1)",
+                                                      "Use_intensity:poly(homogenRS,1)",
+                                                      "Use_intensity:poly(percNHRS,1)",
                                                       "Predominant_land_use:Use_intensity"), verbose = F)}) 
 # save the output
-save(sr_trop, file = paste0(outdir, "/SPECIESRICHNESS_Tropical_Model_selection_incgroup.rdata"))
+save(sr_trop, file = paste0(outdir, "/SPECIESRICHNESS_Tropical_Model_selection.rdata"))
 
 # take a look at the model output
 summary(sr_trop$model)
@@ -83,7 +84,7 @@ summary(sr_trop$model)
 # poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(landcovers.5k, 1) +
 # Predominant_land_use:poly(fert.total_log, 1) + Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + 
 # Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1)  + 
-# (1 | SS) +  (1 | SSB) + (1 | SSBS) + (1 | group)
+# (1 | SS) +  (1 | SSB) + (1 | SSBS)
 
 # extract the stats produced as part of the model selection process
 sr_trop_stats <- as.data.frame(sr_trop$stats)
@@ -102,21 +103,21 @@ system.time({sr_temp <- GLMERSelect(modelData = final.data.trans_temp,
                                 responseVar = "Species_richness",
                                 fitFamily = "poisson", 
                                 fixedFactors = c("Predominant_land_use", "Forest_biome", "Use_intensity"),
-                                fixedTerms = list(fert.total_log = 1, Hansen_mindist_log = 1, landcovers.5k = 1, homogen = 1, percNH = 1),
-                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)+(1|group)", 
-                                fixedInteractions = c("Predominant_land_use:poly(fert.total_log,1)", 
-                                                      "Predominant_land_use:poly(Hansen_mindist_log,1)",
-                                                      "Predominant_land_use:poly(landcovers.5k,1)", 
-                                                      "Predominant_land_use:poly(homogen,1)", 
-                                                      "Predominant_land_use:poly(percNH,1)",
-                                                      "Use_intensity:poly(fert.total_log,1)", 
-                                                      "Use_intensity:poly(Hansen_mindist_log,1)",
-                                                      "Use_intensity:poly(landcovers.5k,1)",
-                                                      "Use_intensity:poly(homogen,1)",
-                                                      "Use_intensity:poly(percNH,1)",
+                                fixedTerms = list(fert.total_logRS = 1, Hansen_mindist_logRS = 1, landcovers.5kRS = 1, homogenRS = 1, percNHRS = 1),
+                                randomStruct = "(1|SS)+(1|SSB)+(1|SSBS)", 
+                                fixedInteractions = c("Predominant_land_use:poly(fert.total_logRS,1)", 
+                                                      "Predominant_land_use:poly(Hansen_mindist_logRS,1)",
+                                                      "Predominant_land_use:poly(landcovers.5kRS,1)", 
+                                                      "Predominant_land_use:poly(homogenRS,1)", 
+                                                      "Predominant_land_use:poly(percNHRS,1)",
+                                                      "Use_intensity:poly(fert.total_logRS,1)", 
+                                                      "Use_intensity:poly(Hansen_mindist_logRS,1)",
+                                                      "Use_intensity:poly(landcovers.5kRS,1)",
+                                                      "Use_intensity:poly(homogenRS,1)",
+                                                      "Use_intensity:poly(percNHRS,1)",
                                                       "Predominant_land_use:Use_intensity"), verbose = F)}) 
 # save the output
-save(sr_temp, file = paste0(outdir, "/SPECIESRICHNESS_Temperate_Model_selection_incgroup.rdata"))
+save(sr_temp, file = paste0(outdir, "/SPECIESRICHNESS_Temperate_Model_selection.rdata"))
 
 # take a look at the model output
 summary(sr_temp$model)
@@ -125,7 +126,7 @@ summary(sr_temp$model)
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
 #  poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen,1) + poly(percNH, 1) + 
 # Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH,1) + Predominant_land_use:Use_intensity +
-# (1 | SS) + (1 | SSB) + (1 | SSBS) + (1 | group)
+# (1 | SS) + (1 | SSB) + (1 | SSBS) 
 
 # extract the stats produced as part of the model selection process
 sr_temp_stats <- as.data.frame(sr_temp$stats)
@@ -140,8 +141,8 @@ write.csv(sr_temp_stats, file = paste0(outdir, "/sr_temp_stats.csv"), row.names 
 #                                                          #
 ##%######################################################%##
 
-# load(paste0(outdir, "/SPECIESRICHNESS_Tropical_Model_selection.rdata"))
-# load(paste0(outdir, "/SPECIESRICHNESS_Temperate_Model_selection.rdata"))
+# load(paste0(outdir, "/SPECIESRICHNESS_Tropical_Model_selection_nestedgrp.rdata"))
+# load(paste0(outdir, "/SPECIESRICHNESS_Temperate_Model_selection_nestedgrp.rdata"))
 
 
 # 1. Tropical
@@ -152,16 +153,22 @@ summary(sr_trop$model)
 # poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(landcovers.5k, 1) +
 # Predominant_land_use:poly(fert.total_log, 1) + Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + 
 # Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1)  + 
-# (1 | SS) +  (1 | SSB) + (1 | SSBS) + (1 | group)
+# (1 | SS) +  (1 | SSB) + (1 | SSBS) + (1 | group:SS)
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(homogen, 1) + poly(percNH, 1) + poly(landcovers.5k, 1) + Predominant_land_use:poly(fert.total_log, 1) + Predominant_land_use:poly(homogen, 1) + Predominant_land_use:poly(percNH, 1) + Use_intensity:poly(landcovers.5k, 1) + Use_intensity:poly(percNH, 1)"
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_logRS, 1) + poly(homogenRS, 1) + poly(percNHRS, 1) + poly(landcovers.5kRS, 1) + Predominant_land_use:poly(fert.total_logRS, 1) + Predominant_land_use:poly(homogenRS, 1) + Predominant_land_use:poly(percNHRS, 1) + Use_intensity:poly(landcovers.5kRS, 1) + Use_intensity:poly(percNHRS, 1)"
 
 
 srmod_trop <- GLMER(modelData = final.data.trans_trop, responseVar = "Species_richness", fitFamily = "poisson",
                     fixedStruct = mod_struc,
-                    randomStruct = "(1|SS) + (1|SSB) + (1|SSBS) + (1|group)", REML = TRUE,
-                    maxIters = 20000)
+                    randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE,
+                    maxIters = 40000)
 
+
+# Warning message:
+# In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+#                Model is nearly unidentifiable: large eigenvalue ratio
+#              - Rescale variables?
+# not a problem when group:SS removed
 
 # take a look at the model output
 summary(srmod_trop$model)
@@ -173,7 +180,7 @@ coefs_trop <- fixef(srmod_trop$model)
 write.csv(coefs_trop, file = paste0(outdir, "/SPECIESRICHNESS_Tropical_coefs.csv"), row.names = F)
 
 # save the model output
-save(srmod_trop, file = paste0(outdir, "/SRMOD_Tropical_output_incgroup.rdata"))
+save(srmod_trop, file = paste0(outdir, "/SRMOD_Tropical_output.rdata"))
 
 
 # 2. Temperate
@@ -183,19 +190,19 @@ summary(sr_temp$model)
 # Species_richness ~ Predominant_land_use + Forest_biome + Use_intensity +  
 # poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen,1) + poly(percNH, 1) + 
 # Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH,1) + Predominant_land_use:Use_intensity +
-# (1 | SS) + (1 | SSB) + (1 | SSBS) + (1 | group)
+# (1 | SS) + (1 | SSB) + (1 | SSBS)
 
-mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_log, 1) + poly(Hansen_mindist_log, 1) + poly(homogen, 1) + poly(percNH, 1) + Predominant_land_use:poly(homogen, 1) + Use_intensity:poly(fert.total_log, 1) + Use_intensity:poly(percNH,1) + Predominant_land_use:Use_intensity"
+mod_struc <- "Predominant_land_use + Forest_biome + Use_intensity + poly(fert.total_logRS, 1) + poly(Hansen_mindist_logRS, 1) + poly(homogenRS, 1) + poly(percNHRS, 1) + Predominant_land_use:poly(homogenRS, 1) + Use_intensity:poly(fert.total_logRS, 1) + Use_intensity:poly(percNHRS,1) + Predominant_land_use:Use_intensity"
 
 srmod_temp <- GLMER(modelData = final.data.trans_temp, responseVar = "Species_richness", fitFamily = "poisson",
                     fixedStruct = mod_struc,
-                    randomStruct = "(1|SS) + (1|SSB) + (1|SSBS) + (1|group)", REML = TRUE,
-                    maxIters = 30000)
+                    randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE,
+                    maxIters = 100000)
 
+# Warning message:
+#In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+#               Model failed to converge with max|grad| = 0.00104315 (tol = 0.001, component 1)
 
-#Warning message:
-# In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
-# Model failed to converge with max|grad| = 0.00119871 (tol = 0.001, component 1)
 
 summary(srmod_temp$model)
 
@@ -206,7 +213,7 @@ coefs_temp <- fixef(srmod_temp$model)
 write.csv(coefs_temp, file = paste0(outdir, "/SPECIESRICHNESS_Temperate_coefs.csv"), row.names = F)
 
 # save the model output
-save(srmod_temp, file = paste0(outdir, "/SRMOD_Temperate_output_incgroup.rdata"))
+save(srmod_temp, file = paste0(outdir, "/SRMOD_Temperate_output.rdata"))
 
 
 ##%######################################################%##
@@ -310,7 +317,7 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 cowplot::plot_grid(p2,p3,
-          labels = c("A.", "B."))
+          labels = c("a.", "b."))
 
 
 ggsave(file = paste0(outdir, "/SR_Tropical_model_checks_plots.pdf"), height = 4, width = 8)
@@ -365,7 +372,7 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 cowplot::plot_grid(p2,p3,
-          labels = c("A.", "B."))
+          labels = c("a.", "b."))
 
 
 ggsave(file = paste0(outdir, "/SR_Temperate_model_checks_plots.pdf"), height = 4, width = 8)
