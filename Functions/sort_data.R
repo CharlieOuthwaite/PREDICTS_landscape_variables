@@ -15,25 +15,28 @@ sort_data <- function(modout = NULL, moddata = NULL, scalers = NULL, from = NULL
   # 1. Create table of values to predicted
   
   # basic table of median values and reference factors
-  pred_tab <- data.frame(landcovers.5k = median(moddata$landcovers.5k),
-                         homogen = median(moddata$homogen),
-                         fert.total_log = median(moddata$fert.total_log),
-                         percNH = median(moddata$percNH),
-                         Hansen_mindist_log =  median(moddata$Hansen_mindist_log),
+  pred_tab <- data.frame(landcovers.5kRS = median(moddata$landcovers.5kRS),
+                         homogenRS = median(moddata$homogenRS),
+                         fert.total_logRS = median(moddata$fert.total_logRS),
+                         percNHRS = median(moddata$percNHRS),
+                         Hansen_mindist_logRS =  median(moddata$Hansen_mindist_logRS),
                          Forest_biome = "Temperate Broadleaf & Mixed Forests",
-                         Use_intensity = "Minimal use",
-                         Predominant_land_use = "Primary vegetation",
+                         Use_intensity = "Intense use",
+                         Predominant_land_use = "Cropland",
                          #Tropical = "Temperate",
                          Species_richness = 0,
-                         logAbun = 0, 
-                         RCAR_110km = 0)
+                         logAbun = 0)
+  
+  if(length(levels(moddata$Forest_biome)) == 3){
+    pred_tab$Forest_biome <- "Tropical & Subtropical Moist Broadleaf Forests"
+  }
   
   
   # organise factor levels
   # check levels of factor variables
-  levels(pred_tab$Predominant_land_use) <- levels(modout$data$Predominant_land_use)
-  levels(pred_tab$Use_intensity) <- levels(modout$data$Use_intensity) 
-  levels(pred_tab$Forest_biome) <- levels(modout$data$Forest_biome) 
+  pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = levels(modout$data$Predominant_land_use))
+  pred_tab$Use_intensity <- factor(pred_tab$Use_intensity, levels = levels(modout$data$Use_intensity)) 
+  pred_tab$Forest_biome <- factor(pred_tab$Forest_biome, levels = levels(modout$data$Forest_biome)) 
   
   #if(!is.null(modout$data$Tropical)){
   #levels(pred_tab$Tropical) <- levels(modout$data$Tropical) 
@@ -56,7 +59,7 @@ sort_data <- function(modout = NULL, moddata = NULL, scalers = NULL, from = NULL
   pred_tab2 <- do.call("rbind", replicate(length(vals), pred_tab, simplify = FALSE))
   
   # replace the variable of interest with the new ones
-  pred_tab2[,variable] <- vals_trans
+  pred_tab2[,paste0(variable, "RS")] <- vals_trans
   
   if(is.null(fac)){
   return(pred_tab2)
@@ -76,7 +79,7 @@ sort_data <- function(modout = NULL, moddata = NULL, scalers = NULL, from = NULL
     
     if(n >=3){
       
-      pred_tab3[, fac][(nrow(pred_tab3)/n + 1001):(nrow(pred_tab3)/n + 2000)] <- levels(moddata[, fac])[3]
+      pred_tab3[, fac][(nrow(pred_tab3)/n + 1001):(nrow(pred_tab3)/n + 2000)] <- levels(moddata[, fac])[1]
       
       
     }
