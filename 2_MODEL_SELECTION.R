@@ -59,6 +59,8 @@ final.data.trans_temp_ABUN <- droplevels(final.data.trans_temp_ABUN)
 
 save(final.data.trans_trop_ABUN, file = paste0(outdir, "/final.data.trans_trop_ABUN.rdata"))
 save(final.data.trans_temp_ABUN, file = paste0(outdir, "/final.data.trans_temp_ABUN.rdata"))
+#load(file = paste0(outdir, "/final.data.trans_trop_ABUN.rdata"))
+#load(file = paste0(outdir, "/final.data.trans_temp_ABUN.rdata"))
 
 ##%######################################################%##
 #                                                          #
@@ -201,6 +203,7 @@ write.csv(coefs_trop, file = paste0(outdir, "/ABUNDANCE_Trop_coefs.csv"), row.na
 
 # save the model output
 save(abmod_trop, file = paste0(outdir, "/ABMOD_Tropical_output.rdata"))
+#load(file = paste0(outdir, "/ABMOD_Tropical_output.rdata"))
 
 
 
@@ -235,6 +238,7 @@ write.csv(coefs_temp, file = paste0(outdir, "/ABUNDANCE_Temperate_coefs.csv"), r
 
 # save the model output
 save(abmod_temp, file = paste0(outdir, "/ABMOD_Temperate_output.rdata"))
+#load(file = paste0(outdir, "/ABMOD_Temperate_output.rdata"))
 
 
 
@@ -315,7 +319,7 @@ invisible(dev.off())
 
 # needed for following function
 
-abun_dat <- final.data.trans_temp[!is.na(final.data.trans_temp$Total_abundance), ]
+abun_dat <- final.data.trans_temp_ABUN[!is.na(final.data.trans_temp_ABUN$Total_abundance), ]
 
 abmod_temp$data$SSBS <- abun_dat$SSBS
 abmod_temp$data$Latitude <- abun_dat$Latitude
@@ -349,8 +353,21 @@ p3 <- ggplot(data = ab_test_vals ) +
 
 
 
-cowplot::plot_grid(p1,p2,p3,
-          labels = c("a.", "b.", "c."), nrow = 2)
+# observed vs predicted
+df <- cbind(predict(abmod_temp$model), final.data.trans_temp_ABUN$logAbun)
+df <- as.data.frame(df)
+
+R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
+
+p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  annotate(geom = "text", label = paste0("R2 = ", R2), x = 3, y = 25) +
+  labs(x='Predicted Values', y='Actual Values')+
+  theme_bw()
+
+cowplot::plot_grid(p1,p2,p3,p4,
+          labels = c("a.", "b.", "c.", "d."), nrow = 2)
 
 
 ggsave(file = paste0(outdir, "/Abun_Temperate_model_checks_plots.pdf"), height = 9, width = 9)
@@ -379,7 +396,7 @@ invisible(dev.off())
 
 # needed for following function
 
-abun_dat <- final.data.trans_trop[!is.na(final.data.trans_trop$Total_abundance), ]
+abun_dat <- final.data.trans_trop_ABUN[!is.na(final.data.trans_trop_ABUN$Total_abundance), ]
 
 abmod_trop$data$SSBS <- abun_dat$SSBS
 abmod_trop$data$Latitude <- abun_dat$Latitude
@@ -412,9 +429,22 @@ p3 <- ggplot(data = ab_test_vals ) +
         aspect.ratio = 1)
 
 
+# observed vs predicted
+df <- cbind(predict(abmod_trop$model), final.data.trans_trop_ABUN$logAbun)
+df <- as.data.frame(df)
 
-cowplot::plot_grid(p1,p2,p3,
-                   labels = c("a.", "b.", "c."))
+R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
+
+p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  annotate(geom = "text", label = paste0("R2 = ", R2), x = 2, y = 12) +
+  labs(x='Predicted Values', y='Actual Values')+
+  theme_bw()
+
+cowplot::plot_grid(p1,p2,p3,p4,
+                   labels = c("a.", "b.", "c.", "d."), nrow = 2)
+
 
 
 ggsave(file = paste0(outdir, "/Abun_Tropical_model_checks_plots.pdf"), height = 9, width = 9)

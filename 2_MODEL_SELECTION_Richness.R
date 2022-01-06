@@ -181,6 +181,7 @@ write.csv(coefs_trop, file = paste0(outdir, "/SPECIESRICHNESS_Tropical_coefs.csv
 
 # save the model output
 save(srmod_trop, file = paste0(outdir, "/SRMOD_Tropical_output.rdata"))
+#load(file = paste0(outdir, "/SRMOD_Tropical_output.rdata"))
 
 
 # 2. Temperate
@@ -214,6 +215,7 @@ write.csv(coefs_temp, file = paste0(outdir, "/SPECIESRICHNESS_Temperate_coefs.cs
 
 # save the model output
 save(srmod_temp, file = paste0(outdir, "/SRMOD_Temperate_output.rdata"))
+#load(file = paste0(outdir, "/SRMOD_Temperate_output.rdata"))
 
 
 ##%######################################################%##
@@ -315,12 +317,24 @@ p3 <- ggplot(data = sr_test_vals ) +
         aspect.ratio = 1)
 
 
+# observed vs predicted
+df <- cbind(exp(predict(srmod_trop$model)), final.data.trans_trop$Species_richness)
+df <- as.data.frame(df)
 
-cowplot::plot_grid(p2,p3,
-          labels = c("a.", "b."))
+R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
+
+p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  annotate(geom = "text", label = paste0("R2 = ", R2), x = 55, y = 450) +
+  labs(x='Predicted Values', y='Actual Values')+
+  theme_bw()
+
+cowplot::plot_grid(p2,p3,p4,
+                   labels = c("a.", "b.", "c."), nrow = 2)
 
 
-ggsave(file = paste0(outdir, "/SR_Tropical_model_checks_plots.pdf"), height = 4, width = 8)
+ggsave(file = paste0(outdir, "/SR_Tropical_model_checks_plots.pdf"), height = 9, width = 9)
 
 
 
@@ -371,9 +385,23 @@ p3 <- ggplot(data = sr_test_vals ) +
 
 
 
-cowplot::plot_grid(p2,p3,
-          labels = c("a.", "b."))
+# observed vs predicted
+df <- cbind(exp(predict(srmod_temp$model)), final.data.trans_temp$Species_richness)
+df <- as.data.frame(df)
+
+R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
+
+p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  annotate(geom = "text", label = paste0("R2 = ", R2), x = 30, y = 225) +
+  labs(x='Predicted Values', y='Actual Values')+
+  theme_bw()
+
+cowplot::plot_grid(p2,p3,p4,
+                   labels = c("a.", "b.", "c."), nrow = 2)
 
 
-ggsave(file = paste0(outdir, "/SR_Temperate_model_checks_plots.pdf"), height = 4, width = 8)
+
+ggsave(file = paste0(outdir, "/SR_Temperate_model_checks_plots.pdf"), height = 9, width = 9)
 
