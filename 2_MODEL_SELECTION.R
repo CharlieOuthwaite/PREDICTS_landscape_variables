@@ -359,10 +359,12 @@ df <- as.data.frame(df)
 
 R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
 
+r2lab <- paste("R^2 == ", R2, sep = "")
+
 p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
-  annotate(geom = "text", label = paste0("R2 = ", R2), x = 3, y = 25) +
+  annotate(geom = "text", label = r2lab, x = 3, y = 25, parse = T) +
   labs(x='Predicted Values', y='Actual Values')+
   theme_bw()
 
@@ -435,10 +437,12 @@ df <- as.data.frame(df)
 
 R2 <- round(cor(df[, 1], df[, 2]), digits = 3)
 
+r2lab <- paste("R^2 == ", R2, sep = "")
+
 p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
-  annotate(geom = "text", label = paste0("R2 = ", R2), x = 2, y = 12) +
+  annotate(geom = "text", label = r2lab, x = 3, y = 25, parse = T) +
   labs(x='Predicted Values', y='Actual Values')+
   theme_bw()
 
