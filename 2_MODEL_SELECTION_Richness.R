@@ -164,12 +164,6 @@ srmod_trop <- GLMER(modelData = final.data.trans_trop, responseVar = "Species_ri
                     maxIters = 40000)
 
 
-# Warning message:
-# In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
-#                Model is nearly unidentifiable: large eigenvalue ratio
-#              - Rescale variables?
-# not a problem when group:SS removed
-
 # take a look at the model output
 summary(srmod_trop$model)
 
@@ -199,10 +193,6 @@ srmod_temp <- GLMER(modelData = final.data.trans_temp, responseVar = "Species_ri
                     fixedStruct = mod_struc,
                     randomStruct = "(1|SS) + (1|SSB) + (1|SSBS)", REML = TRUE,
                     maxIters = 100000)
-
-# Warning message:
-#In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
-#               Model failed to converge with max|grad| = 0.00104315 (tol = 0.001, component 1)
 
 
 summary(srmod_temp$model)
