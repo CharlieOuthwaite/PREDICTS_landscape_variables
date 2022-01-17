@@ -132,7 +132,7 @@ pred_tab[6, 3] <- fert2_rescaled
 
 # 4: distance min vs distance max
 
-dist1 <- min(final.data.trans$Hansen_mindist) # 8
+dist1 <- min(final.data.trans$Hansen_mindist) # 0
 dist2 <- max(final.data.trans$Hansen_mindist) # 324.4697
 
 # rescale
