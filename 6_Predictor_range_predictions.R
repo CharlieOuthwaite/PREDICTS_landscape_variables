@@ -293,3 +293,68 @@ write.csv(dif_tab2, paste0(outdir, "/DifferencesTable_nogroup.csv"), row.names =
 
 
 
+##%######################################################%##
+#                                                          #
+####        Create figure to present differences        ####
+#                                                          #
+##%######################################################%##
+
+
+#dif_tab <- read.csv(paste0(outdir, "/DifferencesTable_nogroup.csv"))
+
+
+library(ggplot2)
+
+
+
+dif_tab$trop <- sub(".*_", "", dif_tab$model)
+dif_tab$metric <- sub("_.*", "", dif_tab$model)
+
+dif_tab$trop <- sub("trop", "Tropical", dif_tab$trop)
+dif_tab$trop <- sub("temp", "Non-tropical", dif_tab$trop)
+
+dif_tab$metric <- sub("abmod", "Total Abundance", dif_tab$metric)
+dif_tab$metric <- sub("srmod", "Species Richness", dif_tab$metric)
+
+# rename info
+dif_tab$test  <- sub(" range", "", dif_tab$test)
+dif_tab$test  <- sub("Minimal cropland to Intense cropland", "Use Intensity", dif_tab$test)
+dif_tab$test  <- sub("Intense Primary to Intense Cropland", "Land Use", dif_tab$test)
+dif_tab$test  <- sub("Percentage NH", "Percentage Natural\n Habitat", dif_tab$test)
+dif_tab$test  <- sub("Landcovers", "Number of\n Landcovers", dif_tab$test)
+dif_tab$test  <- sub("Fertiliser", "Total Fertiliser", dif_tab$test)
+dif_tab$test  <- sub("Distance", "Distance to Forest", dif_tab$test)
+
+dif_tab$test <- factor(dif_tab$test, levels = rev(c("Land Use", "Use Intensity", "Distance to Forest",
+                                                "Percentage Natural\n Habitat", "Total Fertiliser",
+                                                "Number of\n Landcovers", "Homogeneity")))
+
+dif_tab$trop <- factor(dif_tab$trop, levels = c("Tropical", "Non-tropical"))
+
+dif_tab$median[dif_tab$median == 0] <- NA
+dif_tab$lower[dif_tab$lower == 0] <- NA
+dif_tab$upper[dif_tab$upper == 0] <- NA
+
+
+ggplot(data = dif_tab) + 
+  geom_point(aes(x = test, y = median, shape = trop, col = trop), position = position_dodge(width = 0.9), size = 2.5) +
+  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = trop), 
+                position = position_dodge2(padding = 0.5),
+                size = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  facet_wrap(~ metric) + coord_flip() +
+  ylab("Percentage Change") + 
+  scale_color_manual(values = c("#66CDAA", "#27408B")) +
+  theme_bw() +
+  theme(legend.title = element_blank(), 
+        panel.grid = element_blank(),
+        legend.text = element_text(size = 10),
+        aspect.ratio = 1, legend.background = element_blank(),
+        text = element_text(size = 12), 
+        axis.title.y = element_blank(),
+        legend.position = "bottom")
+
+
+ggsave(filename = paste0(outdir, "/Difference_plot.pdf"))  
+
+
