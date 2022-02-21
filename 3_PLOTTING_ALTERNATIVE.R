@@ -29,6 +29,9 @@ datadir <- '1_PREDICTS_PLUS_VARIABLES'
 moddir <- '2_MODEL_SELECTION'
 outdir <- '3_PLOTTING'
 
+# create outdir if it doesn't exist already
+if(!dir.exists(outdir)) dir.create(outdir)
+
 # load the selected models
 load(paste0(moddir, "/ABMOD_Tropical_output.rdata"))
 load(paste0(moddir, "/ABMOD_Temperate_output.rdata"))
@@ -44,7 +47,7 @@ source('functions/rescale.r')
 source('functions/unscale.r')
 
 
-# load the dataset
+# load the datasets
 load(paste0(moddir, "/final.data.trans_trop_ABUN.rdata"))
 load(paste0(moddir, "/final.data.trans_temp_ABUN.rdata"))
 
@@ -52,7 +55,6 @@ load(paste0(moddir, "/final.data.trans_temp_ABUN.rdata"))
 # read in the PREDICTS datasets with landscape variables
 load(paste0(datadir, "/PREDICTS_dataset_inc_variables_TRANS.rdata"))
 final.data.trans <- droplevels(final.data.trans)
-
 
 
 # Split the dataset based on realm
@@ -65,17 +67,28 @@ final.data.trans_temp <- final.data.trans[final.data.trans$Tropical == "Temperat
 nrow(final.data.trans_temp) # 6674
 final.data.trans_temp <- droplevels(final.data.trans_temp)
 
-
-
 # set quantiles of predicted result to be presented in the plots
 exclQuantiles <- c(0.025,0.975)
 
+#### create custom theme to be applied to all plots ####
+
+theme_custom <- theme(panel.grid = element_blank(),
+                      legend.position = c(0.8,0.8), legend.title = element_blank(),
+                      legend.text = element_text(size = 8),
+                      aspect.ratio = 1, legend.background = element_blank(),
+                      text = element_text(size = 8), 
+                      line = element_line(size = 0.2), 
+                      panel.border = element_rect(size = 0.2))
+
 
 ##%######################################################%##
 #                                                          #
-####               Fig 1: Dist to forest                ####
+####                 Distance to forest                 ####
 #                                                          #
 ##%######################################################%##
+
+#### Abundance, Tropical ####
+
 
 range(final.data.trans$Hansen_mindist)
 # 0.0000 324.4697
@@ -102,6 +115,11 @@ pred_tab <- sort_data(modout = abmod_trop,
                       n = n,
                       logval = logval)
 
+
+# reference for % difference = primary vegetation and distance closest to 0
+refRow <- which((pred_tab$Predominant_land_use=="Primary vegetation") & (pred_tab$Hansen_mindist_logRS==min(pred_tab$Hansen_mindist_logRS)))
+
+
 # sort quantiles
 QPV <- quantile(x = abmod_trop$data$Hansen_mindist_logRS[
   abmod_trop$data$Predominant_land_use=="Primary vegetation"],
@@ -119,6 +137,8 @@ result <- PredictGLMERRandIter(model = abmod_trop$model,data = pred_tab, nIters 
 # back transform the abundance values
 result <- exp(result)-1
 
+# convert to relative to reference
+result <- sweep(x = result,MARGIN = 2,STATS = result[refRow,],FUN = '/')
 
 # remove anything above and below the quantiles
 result[which(pred_tab$Predominant_land_use == "Primary vegetation" & pred_tab$Hansen_mindist_logRS < QPV[1]), ] <- NA
@@ -130,40 +150,127 @@ result[which(pred_tab$Predominant_land_use == "Cropland" & pred_tab$Hansen_mindi
 
 
 # Get the median, upper and lower quants for the plot
-pred_tab$PredMedian <- apply(X = result,MARGIN = 1,
-                               FUN = median,na.rm=TRUE)
-pred_tab$PredUpper <- apply(X = result,MARGIN = 1,
-                              FUN = quantile,probs = 0.975,na.rm=TRUE)
-pred_tab$PredLower <- apply(X = result,MARGIN = 1,
-                              FUN = quantile,probs = 0.025,na.rm=TRUE)
+pred_tab$PredMedian <- ((apply(X = result,MARGIN = 1,
+                               FUN = median,na.rm=TRUE))*100)-100
+pred_tab$PredUpper <- ((apply(X = result,MARGIN = 1,
+                              FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+pred_tab$PredLower <- ((apply(X = result,MARGIN = 1,
+                              FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
 
 pred_tab$dist_ori <- vals
 
 pred_tab$realm <- "Tropical"
 
-pred_tab$Predominant_land_use <- sub(" vegetation", "", pred_tab$Predominant_land_use )
-pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = c("Primary", "Secondary", "Cropland"))
+#pred_tab$Predominant_land_use <- sub(" vegetation", "", pred_tab$Predominant_land_use )
+#pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = c("Primary", "Secondary", "Cropland"))
+
 
 # SR plot = full range
 ggplot(data = pred_tab) +
   geom_line(aes(x = dist_ori, y = PredMedian, col = Predominant_land_use)) +
   geom_ribbon(aes(x = dist_ori, ymin= PredLower, ymax = PredUpper, fill = Predominant_land_use), alpha = 0.3) +
   geom_rug(data = final.data.trans_trop_ABUN, aes(x = Hansen_mindist, col = Predominant_land_use), size = 0.1) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   #facet_grid(~realm) +
-  ylim(c(0,200)) +
+  ylim(c(-100,100)) +
   xlim(c(0, 10)) +
   xlab("Distance to Forest (Km)") +
   ylab("Total Abundance") +
   scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"), labels = c("Primary", "Secondary", "Cropland"))+
   scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E"), labels = c("Primary", "Secondary", "Cropland")) +
   theme_bw() +
-  theme(panel.grid = element_blank(),
-        legend.position = c(0.8,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        aspect.ratio = 1, legend.background = element_blank(),
-        text = element_text(size = 16)) 
+  theme_custom
+  
 
-ggsave(filename = paste0(outdir, "/FIGURE_1_Dist_tropabun.pdf"), width = 4, height = 4, unit = "in")
+
+ggsave(filename = paste0(outdir, "/FIGURE_1_Dist_tropabun_refrow.pdf"), width = 3, height = 3, unit = "in")
+
+
+
+#### Richness, Temperate ####
+
+
+range(final.data.trans$Hansen_mindist)
+# 0.0000 324.4697
+
+from = 0
+to = 325
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'Hansen_mindist_log'
+fac <- NULL
+n <- NULL
+logval = TRUE
+
+
+
+# organise the data
+pred_tab <- sort_data(modout = srmod_temp,
+                      moddata = final.data.trans_temp,
+                      scalers = scalers,
+                      from = from, 
+                      to = to,
+                      vals = vals, 
+                      variable = variable,
+                      fac = fac, 
+                      n = n,
+                      logval = logval)
+
+# reference for % difference = primary vegetation and distance closest to 0
+refRow <- which((pred_tab$Predominant_land_use=="Cropland") & (pred_tab$Hansen_mindist_logRS==min(pred_tab$Hansen_mindist_logRS)))
+
+
+
+# sort quantiles
+Qdist <- quantile(x = srmod_temp$data$Hansen_mindist_logRS,
+                  probs = exclQuantiles)
+
+
+# predict the results
+result <- PredictGLMERRandIter(model = srmod_temp$model,data = pred_tab, nIters = 10000)
+
+# back transform the abundance values
+result <- exp(result)
+
+# convert to relative to reference
+result <- sweep(x = result,MARGIN = 2,STATS = result[refRow,],FUN = '/')
+
+# remove anything above and below the quantiles
+result[which(pred_tab$Hansen_mindist_logRS < Qdist[1]), ] <- NA
+result[which(pred_tab$Hansen_mindist_logRS > Qdist[2]), ] <- NA
+
+
+# Get the median, upper and lower quants for the plot
+pred_tab$PredMedian <- ((apply(X = result,MARGIN = 1,
+                             FUN = median,na.rm=TRUE))*100)-100
+pred_tab$PredUpper <- ((apply(X = result,MARGIN = 1,
+                            FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+pred_tab$PredLower <- ((apply(X = result,MARGIN = 1,
+                            FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+pred_tab$dist_ori <- vals
+
+pred_tab$realm <- "Non-tropical"
+
+# SR plot = full range
+ggplot(data = pred_tab) +
+  geom_line(aes(x = dist_ori, y = PredMedian), col = c("#EEAD0E")) +
+  geom_ribbon(aes(x = dist_ori, ymin= PredLower, ymax = PredUpper), fill = c("#EEAD0E"), alpha = 0.3) +
+  geom_rug(data = final.data.trans_trop_ABUN, aes(x = Hansen_mindist), size = 0.1) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  #facet_grid(~realm) +
+  ylim(c(-50,50)) +
+  xlim(c(0, 20)) +
+  xlab("Distance to Forest (Km)") +
+  ylab("Species Richness") +
+  #scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"))+
+  #scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
+  theme_bw() +
+  theme_custom
+
+ggsave(filename = paste0(outdir, "/Dist_richtemp_refrow.pdf"), width = 3, height = 3, uni = "in")
+
+
+
 
 
 ##%######################################################%##
@@ -1640,91 +1747,6 @@ ggplot(data = pred_tab2) +
 
 ggsave(filename = paste0(outdir, "/PercNHLU_RichTemp.pdf"), width = 4, height = 4, unit = "in")
 
-
-
-
-##%######################################################%##
-#                                                          #
-####        distance to forest, richness, temp          ####
-#                                                          #
-##%######################################################%##
-
-
-
-range(final.data.trans$Hansen_mindist)
-# 0.0000 324.4697
-
-from = 0
-to = 325
-vals <- seq(from = from, to = to, length.out = 1000)
-variable <- 'Hansen_mindist_log'
-fac <- NULL
-n <- NULL
-logval = TRUE
-
-
-
-# organise the data
-pred_tab <- sort_data(modout = srmod_temp,
-                      moddata = final.data.trans_temp,
-                      scalers = scalers,
-                      from = from, 
-                      to = to,
-                      vals = vals, 
-                      variable = variable,
-                      fac = fac, 
-                      n = n,
-                      logval = logval)
-
-# sort quantiles
-Qdist <- quantile(x = srmod_temp$data$Hansen_mindist_logRS,
-  probs = exclQuantiles)
-
-
-# predict the results
-result <- PredictGLMERRandIter(model = srmod_temp$model,data = pred_tab, nIters = 10000)
-
-# back transform the abundance values
-result <- exp(result)
-
-
-# remove anything above and below the quantiles
-result[which(pred_tab$Hansen_mindist_logRS < Qdist[1]), ] <- NA
-result[which(pred_tab$Hansen_mindist_logRS > Qdist[2]), ] <- NA
-
-
-# Get the median, upper and lower quants for the plot
-pred_tab$PredMedian <- apply(X = result,MARGIN = 1,
-                             FUN = median,na.rm=TRUE)
-pred_tab$PredUpper <- apply(X = result,MARGIN = 1,
-                            FUN = quantile,probs = 0.975,na.rm=TRUE)
-pred_tab$PredLower <- apply(X = result,MARGIN = 1,
-                            FUN = quantile,probs = 0.025,na.rm=TRUE)
-
-pred_tab$dist_ori <- vals
-
-pred_tab$realm <- "Non-tropical"
-
-# SR plot = full range
-ggplot(data = pred_tab) +
-  geom_line(aes(x = dist_ori, y = PredMedian), col = c("#458B00")) +
-  geom_ribbon(aes(x = dist_ori, ymin= PredLower, ymax = PredUpper), fill = c("#458B00"), alpha = 0.3) +
-  geom_rug(data = final.data.trans_trop_ABUN, aes(x = Hansen_mindist), size = 0.1) +
-  #facet_grid(~realm) +
-  ylim(c(0,25)) +
-  xlim(c(0, 20)) +
-  xlab("Distance to Forest (Km)") +
-  ylab("Species Richness") +
-  #scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"))+
-  #scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E")) +
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        legend.position = c(0.78,0.9), legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        aspect.ratio = 1, legend.background = element_blank(),
-        text = element_text(size = 16)) 
-
-ggsave(filename = paste0(outdir, "/Dist_richtemp.pdf"), width = 4, height = 4, uni = "in")
 
 
 
