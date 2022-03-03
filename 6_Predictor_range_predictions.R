@@ -65,7 +65,7 @@ cellStats(homogen, stat = 'range') # 0.065 1.000
 
 ##%######################################################%##
 #                                                          #
-####             predict biodiversity loss              ####
+####             Project biodiversity loss              ####
 #                                                          #
 ##%######################################################%##
 
@@ -305,6 +305,16 @@ write.csv(dif_tab2, paste0(outdir, "/DifferencesTable_nogroup.csv"), row.names =
 
 library(ggplot2)
 
+theme_custom <- theme(panel.grid = element_blank(),
+                      legend.position = c(0.8,0.8), legend.title = element_blank(),
+                      legend.text = element_text(size = 8),
+                      aspect.ratio = 1, legend.background = element_blank(),
+                      text = element_text(size = 8), 
+                      line = element_line(size = 0.2), 
+                      panel.border = element_rect(size = 0.2),
+                      strip.background = element_rect(size = 0.2),
+                      axis.ticks = element_line(size = 0.2),
+                      axis.title.y = element_blank())
 
 
 dif_tab$trop <- sub(".*_", "", dif_tab$model)
@@ -335,26 +345,389 @@ dif_tab$median[dif_tab$median == 0] <- NA
 dif_tab$lower[dif_tab$lower == 0] <- NA
 dif_tab$upper[dif_tab$upper == 0] <- NA
 
+dif_tab$metric <- factor(dif_tab$metric, levels = c("Total Abundance", "Species Richness"))
+
 
 ggplot(data = dif_tab) + 
-  geom_point(aes(x = test, y = median, shape = trop, col = trop), position = position_dodge(width = 0.9), size = 2.5) +
+  geom_point(aes(x = test, y = median, shape = trop, col = trop), position = position_dodge(width = 0.9), size = 2) +
   geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = trop), 
                 position = position_dodge2(padding = 0.5),
                 size = 0.5) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   facet_wrap(~ metric) + coord_flip() +
   ylab("Percentage Change") + 
   scale_color_manual(values = c("#66CDAA", "#27408B")) +
   theme_bw() +
-  theme(legend.title = element_blank(), 
-        panel.grid = element_blank(),
-        legend.text = element_text(size = 10),
-        aspect.ratio = 1, legend.background = element_blank(),
-        text = element_text(size = 12), 
-        axis.title.y = element_blank(),
-        legend.position = "bottom")
+  theme_custom +
+  theme(strip.background = element_rect(fill = NA))
 
 
-ggsave(filename = paste0(outdir, "/Difference_plot.pdf"))  
+
+ggsave(filename = paste0(outdir, "/Difference_plot.pdf"), width = 6, height = 3, unit = "in")  
 
 
+
+
+
+##%######################################################%##
+#                                                          #
+####       Interactions differences across range        ####
+#                                                          #
+##%######################################################%##
+
+# as with the above, look at differences across the range of predictor 
+# values but for interactions across land use or use intensity where the 
+# interaction was signigicant in model selection process. 
+
+
+#### 1. tropical results first ####
+
+# basic table of median values and reference factors
+pred_tab <- data.frame(landcovers.5kRS = median(final.data.trans$landcovers.5kRS),
+                       homogenRS = median(final.data.trans$homogenRS),
+                       fert.total_logRS = median(final.data.trans$fert.total_logRS),
+                       percNHRS = median(final.data.trans$percNHRS),
+                       Hansen_mindist_logRS =  median(final.data.trans$Hansen_mindist_logRS),
+                       Forest_biome = "Tropical & Subtropical Moist Broadleaf Forests",
+                       Use_intensity = "Intense use",
+                       Predominant_land_use = "Cropland",
+                       Species_richness = 0,
+                       logAbun = 0)
+
+
+pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = levels(abmod_trop$data$Predominant_land_use))
+pred_tab$Use_intensity <- factor(pred_tab$Use_intensity, levels = levels(abmod_trop$data$Use_intensity))
+pred_tab$Forest_biome <- factor(pred_tab$Forest_biome, levels = levels(abmod_trop$data$Forest_biome)[c(3, 2, 1)])
+
+
+# 1: distance across land covers (abundance)
+pred_tab1 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab1$Predominant_land_use[1:4] <- c("Primary vegetation", "Primary vegetation", "Secondary vegetation", "Secondary vegetation")
+pred_tab1$Hansen_mindist_logRS[c(1,3,5)] <- min(final.data.trans$Hansen_mindist_logRS)
+pred_tab1$Hansen_mindist_logRS[c(2,4,6)] <- max(final.data.trans$Hansen_mindist_logRS)
+
+pred_tab1$metric <- "abun"
+pred_tab1$test <- "Distance to forest"
+pred_tab1$cat <- "Land Use"
+pred_tab1$realm <- "Tropical"
+
+
+# 2: Landcovers across use intensities (abundance)
+pred_tab2 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab2$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab2$landcovers.5kRS[c(1,3,5)] <- min(final.data.trans$landcovers.5kRS)
+pred_tab2$landcovers.5kRS[c(2,4,6)] <- max(final.data.trans$landcovers.5kRS)
+
+pred_tab2$metric <- "abun"
+pred_tab2$test <- "Number of Landcovers"
+pred_tab2$cat <- "Use Intensity"
+pred_tab2$realm <- "Tropical"
+
+
+# 3: percnh across use intensities and landcovers (richness)
+pred_tab3 <- do.call("rbind", replicate(12, pred_tab, simplify = FALSE))
+pred_tab3$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab3$Predominant_land_use[7:10] <- c("Primary vegetation", "Primary vegetation", "Secondary vegetation", "Secondary vegetation")
+pred_tab3$percNHRS[c(1,3,5,7,9,11)] <- min(final.data.trans$percNHRS)
+pred_tab3$percNHRS[c(2,4,6,8,10,12)] <- max(final.data.trans$percNHRS)
+
+pred_tab3$metric <- "rich"
+pred_tab3$test <- "Percentage Natural Habitat"
+pred_tab3$cat <- NA
+pred_tab3$cat[1:6] <- "Use Intensity"
+pred_tab3$cat[7:12] <- "Land Use"
+pred_tab3$realm <- "Tropical"
+
+
+# 4: Fertiliser across land uses (richness)
+pred_tab4 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab4$Predominant_land_use[1:4] <- c("Primary vegetation", "Primary vegetation", "Secondary vegetation", "Secondary vegetation")
+pred_tab4$fert.total_logRS[c(1,3,5)] <- min(final.data.trans$fert.total_logRS)
+pred_tab4$fert.total_logRS[c(2,4,6)] <- max(final.data.trans$fert.total_logRS)
+
+pred_tab4$metric <- "rich"
+pred_tab4$test <- "Total Fertiliser"
+pred_tab4$cat <- "Land Use"
+pred_tab4$realm <- "Tropical"
+
+
+# 5: Landcovers across use intensities (richness)
+pred_tab5 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab5$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab5$landcovers.5kRS[c(1,3,5)] <- min(final.data.trans$landcovers.5kRS)
+pred_tab5$landcovers.5kRS[c(2,4,6)] <- max(final.data.trans$landcovers.5kRS)
+
+pred_tab5$metric <- "rich"
+pred_tab5$test <- "Number of Landcovers"
+pred_tab5$cat <- "Use Intensity"
+pred_tab5$realm <- "Tropical"
+
+
+# 6: Homogeneity across land uses (richess)
+pred_tab6 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab6$Predominant_land_use[1:4] <- c("Primary vegetation", "Primary vegetation", "Secondary vegetation", "Secondary vegetation")
+pred_tab6$homogenRS[c(1,3,5)] <- min(final.data.trans$homogenRS)
+pred_tab6$homogenRS[c(2,4,6)] <- max(final.data.trans$homogenRS)
+
+pred_tab6$metric <- "rich"
+pred_tab6$test <- "Homogeneity"
+pred_tab6$cat <- "Land Use"
+pred_tab6$realm <- "Tropical"
+
+
+# bring together table for abundance  projections
+
+pred_tab_abtrop <- rbind(pred_tab1, pred_tab2)
+pred_tab_srtrop <- rbind(pred_tab3, pred_tab4, pred_tab5, pred_tab6)
+
+
+#### 2. temperate results next ####
+
+
+
+# basic table of median values and reference factors
+pred_tab <- data.frame(landcovers.5kRS = median(final.data.trans$landcovers.5kRS),
+                       homogenRS = median(final.data.trans$homogenRS),
+                       fert.total_logRS = median(final.data.trans$fert.total_logRS),
+                       percNHRS = median(final.data.trans$percNHRS),
+                       Hansen_mindist_logRS =  median(final.data.trans$Hansen_mindist_logRS),
+                       Forest_biome = "Temperate Broadleaf & Mixed Forests",
+                       Use_intensity = "Intense use",
+                       Predominant_land_use = "Cropland",
+                       Species_richness = 0,
+                       logAbun = 0)
+
+
+pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = levels(abmod_trop$data$Predominant_land_use))
+pred_tab$Use_intensity <- factor(pred_tab$Use_intensity, levels = levels(abmod_trop$data$Use_intensity))
+pred_tab$Forest_biome <- factor(pred_tab$Forest_biome, levels = levels(srmod_temp$data$Forest_biome))
+
+
+
+# 1: percnh across use intensities (richness)
+pred_tab1 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab1$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab1$percNHRS[c(1,3,5)] <- min(final.data.trans$percNHRS)
+pred_tab1$percNHRS[c(2,4,6)] <- max(final.data.trans$percNHRS)
+
+pred_tab1$metric <- "rich"
+pred_tab1$test <- "Percentage Natural Habitat"
+pred_tab1$cat<- "Use Intensity"
+pred_tab1$realm <- "Non-tropical"
+
+
+
+# 2: Fertiliser across use intensities (richness)
+pred_tab2 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab2$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab2$fert.total_logRS[c(1,3,5)] <- min(final.data.trans$fert.total_logRS)
+pred_tab2$fert.total_logRS[c(2,4,6)] <- max(final.data.trans$fert.total_logRS)
+
+pred_tab2$metric <- "rich"
+pred_tab2$test <- "Total Fertiliser"
+pred_tab2$cat <- "Use Intensity"
+pred_tab2$realm <- "Non-tropical"
+
+
+
+# 3: Homogeneity across land uses (richess)
+pred_tab3 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab3$Predominant_land_use[1:4] <- c("Primary vegetation", "Primary vegetation", "Secondary vegetation", "Secondary vegetation")
+pred_tab3$homogenRS[c(1,3,5)] <- min(final.data.trans$homogenRS)
+pred_tab3$homogenRS[c(2,4,6)] <- max(final.data.trans$homogenRS)
+
+pred_tab3$metric <- "rich"
+pred_tab3$test <- "Homogeneity"
+pred_tab3$cat <- "Land Use"
+pred_tab3$realm <- "Non-tropical"
+
+
+# 4: Fertiliser across use intensities (abundance)
+pred_tab4 <- do.call("rbind", replicate(6, pred_tab, simplify = FALSE))
+pred_tab4$Use_intensity[1:4] <- c("Minimal use", "Minimal use", "Light use", "Light use")
+pred_tab4$fert.total_logRS[c(1,3,5)] <- min(final.data.trans$fert.total_logRS)
+pred_tab4$fert.total_logRS[c(2,4,6)] <- max(final.data.trans$fert.total_logRS)
+
+pred_tab4$metric <- "abun"
+pred_tab4$test <- "Total Fertiliser"
+pred_tab4$cat <- "Use Intensity"
+pred_tab4$realm <- "Non-tropical"
+
+
+
+# bring together table for abundance  projections
+
+pred_tab_abtemp<- pred_tab4
+pred_tab_srtemp <- rbind(pred_tab1, pred_tab2, pred_tab3)
+
+
+
+# predict the result
+result_srtrop <- PredictGLMERRandIter(model = srmod_trop$model, data = pred_tab_srtrop, nIters = 10000)
+result_abtrop <- PredictGLMERRandIter(model = abmod_trop$model, data = pred_tab_abtrop, nIters = 10000)
+
+
+# run temperate models
+result_srtemp <- PredictGLMERRandIter(model = srmod_temp$model, data = pred_tab_srtemp, nIters = 10000)
+result_abtemp <- PredictGLMERRandIter(model = abmod_temp$model, data = pred_tab_abtemp, nIters = 10000)
+
+
+
+# transform the results
+result_srtrop<- exp(result_srtrop)
+result_srtemp<- exp(result_srtemp)
+result_abtrop<- exp(result_abtrop)-1
+result_abtemp<- exp(result_abtemp)-1
+
+
+# calculate the percentage differences between iterations
+
+
+# function to get percentage change from starting and ending values
+perc_change <- function(start, end){
+  
+  cng <- round(((end-start)/start)*100, 2)
+  return(cng)
+  
+}
+
+# combine results
+allresults <- as.data.frame(rbind(result_srtrop, result_srtemp, result_abtrop, result_abtemp))
+
+dif_tab <-  NULL
+
+
+# fill in differences
+for(i in 1:nrow(allresults)){
+  
+  if(i %% 2 == 0){
+    
+    # determine the percentage change across all iters
+    chng <- perc_change(allresults[i-1,], allresults[i,])
+    
+    med_change <- median(as.numeric(chng))
+    LCI_change <- quantile(chng, probs = 0.025)
+    UCI_change <- quantile(chng, probs = 0.975)
+    
+    dif_tab<- rbind(dif_tab, c(med_change, LCI_change, UCI_change))
+    
+    
+    # changes_abtrop[i, 1] <- median(perc_change(result_abtrop[i-1,], result_abtrop[i,]))
+    # changes_abtrop[i, 2] <- quantile(perc_change(result_abtrop[i-1,], result_abtrop[i,]), probs = 0.025)
+    # changes_abtrop[i, 3] <- quantile(perc_change(result_abtrop[i-1,], result_abtrop[i,]), probs = 0.975)
+    
+    
+    
+  }else{next}
+  
+  
+}
+
+
+# organise table
+
+dif_tab2 <- as.data.frame(dif_tab)
+#dif_tab2 <- do.call(rbind.data.frame, dif_tab2)
+
+
+colnames(dif_tab2) <- c("median", "lower", "upper")
+
+dif_tab2$median <- as.numeric(dif_tab2$median)
+dif_tab2$lower <- as.numeric(dif_tab2$lower)
+dif_tab2$upper <- as.numeric(dif_tab2$upper)
+
+
+# add details of tests
+tests <- c(pred_tab_srtrop$test, pred_tab_srtemp$test, pred_tab_abtrop$test, pred_tab_abtemp$test)
+tests <- tests[seq(1, length(tests), 2)]
+dif_tab2$test <- tests
+
+cat <- c(pred_tab_srtrop$cat, pred_tab_srtemp$cat, pred_tab_abtrop$cat, pred_tab_abtemp$cat)
+cat <- cat[seq(1, length(cat), 2)]
+dif_tab2$cat <- cat
+
+realm <- c(pred_tab_srtrop$realm, pred_tab_srtemp$realm, pred_tab_abtrop$realm, pred_tab_abtemp$realm)
+realm <- realm[seq(1, length(realm), 2)]
+dif_tab2$realm <- realm
+
+
+dif_tab2$colour <- NA
+dif_tab2$colour[dif_tab2$cat == "Use Intensity"] <- rep(c("Minimal use", " Light use", "Intense use"))
+dif_tab2$colour[dif_tab2$cat == "Land Use"] <- rep(c("Primary vegetation", "Secondary vegetation", "Cropland"))
+
+metric <- c(pred_tab_srtrop$metric, pred_tab_srtemp$metric, pred_tab_abtrop$metric, pred_tab_abtemp$metric)
+metric <- metric[seq(1, length(metric), 2)]
+dif_tab2$metric <- metric
+
+# save the results table
+write.csv(dif_tab2, paste0(outdir, "/DifferencesTable_Interactions.csv"), row.names = F)
+
+
+
+##%######################################################%##
+#                                                          #
+####        Create figure to present differences        ####
+#                                                          #
+##%######################################################%##
+
+
+#dif_tab2 <- read.csv(paste0(outdir, "/DifferencesTable_Interactions.csv"))
+
+dif_tab2$test <- sub("Percentage Natural Habitat", "Percentage Natural\n Habitat", dif_tab2$test)
+dif_tab2$test <- sub("Number of Landcovers", "Number of\n Landcovers", dif_tab2$test)
+
+dif_tab2$test <- factor(dif_tab2$test, levels = rev(c("Distance to forest",
+                                                    "Percentage Natural\n Habitat", "Total Fertiliser",
+                                                    "Number of\n Landcovers", "Homogeneity")))
+
+dif_tab2$realm <- factor(dif_tab2$realm, levels = c("Tropical", "Non-tropical"))
+
+dif_tab2$colour <- factor(dif_tab2$colour, levels = rev(c("Minimal use", " Light use", "Intense use", "Primary vegetation", "Secondary vegetation", "Cropland")))
+
+dif_tab2$metric <- sub("abun", "Total Abundance", dif_tab2$metric)
+dif_tab2$metric <- sub("rich", "Species Richness", dif_tab2$metric)
+
+dif_tab2$metric <- factor(dif_tab2$metric, levels = c("Total Abundance", "Species Richness"))
+
+# dif_tab$median[dif_tab$median == 0] <- NA
+# dif_tab$lower[dif_tab$lower == 0] <- NA
+# dif_tab$upper[dif_tab$upper == 0] <- NA
+
+
+ggplot(data = dif_tab2[dif_tab2$cat == "Land Use", ]) + 
+  geom_point(aes(x = test, y = median,  col = colour, shape = colour), position = position_dodge(width = 0.9), size = 1.5) +
+  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour), 
+                position = position_dodge2(padding = 0.5),
+                size = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  facet_grid(realm~  metric) + coord_flip() +
+  ylab("Percentage Change") + 
+  scale_color_manual(values = rev(c("#006400", "#8B0000", "#EEAD0E"))) +
+  theme_bw() +
+  theme_custom + 
+  theme(legend.position = "bottom", strip.background = element_rect(fill = NA))
+
+
+ggsave(filename = paste0(outdir, "/Difference_interactions_LU_plot.pdf"), height = 6, width = 6, units = "in")  
+
+#"#66CD00", "#FFB90F", "#EE0000" minimal, light, intense
+
+#"#006400", "#8B0000", "#EEAD0E" primary, secondary, cropland
+
+
+ggplot(data = dif_tab2[dif_tab2$cat == "Use Intensity", ]) + 
+  geom_point(aes(x = test, y = median, col = colour, shape = colour), position = position_dodge(width = 0.9), size = 1.5) +
+  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour), 
+                position = position_dodge2(padding = 0.5),
+                size = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  facet_grid(realm~  metric) + coord_flip() +
+  ylab("Percentage Change") + 
+  scale_color_manual(values = rev(c("#66CD00", "#FFB90F", "#EE0000"))) +
+  theme_bw() +
+  theme_custom + 
+  theme(legend.position = "bottom", strip.background = element_rect(fill = NA))
+
+
+
+ggsave(filename = paste0(outdir, "/Difference_interactions_UI_plot.pdf"), height = 6, width = 6, units = "in")  
