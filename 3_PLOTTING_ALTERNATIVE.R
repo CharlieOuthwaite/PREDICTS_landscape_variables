@@ -120,7 +120,7 @@ pred_tab <- sort_data(modout = abmod_trop,
 
 
 # reference for % difference = primary vegetation and distance closest to 0
-refRow <- which((pred_tab$Predominant_land_use=="Primary vegetation") & (pred_tab$Hansen_mindist_logRS==min(pred_tab$Hansen_mindist_logRS)))
+refRow <- which((pred_tab$Predominant_land_use=="Cropland") & (pred_tab$Hansen_mindist_logRS==min(pred_tab$Hansen_mindist_logRS)))
 
 
 # sort quantiles
@@ -598,7 +598,264 @@ ggsave(filename = paste0(outdir, "/Homogen_RichTemp.pdf"), width = 3, height = 3
 #                                                          #
 ##%######################################################%##
 
+#### Tropical, richness ####
 
+range(final.data.trans$fert.total)
+# 0 2314226
+
+from = 0
+to = 2000
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'fert.total_log'
+fac <- 'Predominant_land_use'
+n <- 3
+logval = TRUE
+
+# organise the data
+pred_tab <- sort_data(modout = srmod_trop,
+                      moddata = final.data.trans_trop,
+                      scalers = scalers,
+                      from = from, 
+                      to = to,
+                      vals = vals, 
+                      variable = variable,
+                      fac = fac, 
+                      n = n,
+                      logval = logval)
+
+# reference for % difference = primary vegetation and distance closest to 0
+refRow <- which((pred_tab$Predominant_land_use=="Cropland") & (pred_tab$fert.total_logRS==min(pred_tab$fert.total_logRS)))
+
+
+# sort quantiles
+QPV <- quantile(x = srmod_trop$data$fert.total_logRS[
+  srmod_trop$data$Predominant_land_use=="Primary vegetation"],
+  probs = exclQuantiles)
+QSV <- quantile(x = srmod_trop$data$fert.total_logRS[
+  srmod_trop$data$Predominant_land_use=="Secondary vegetation"],
+  probs = exclQuantiles)
+QCR <- quantile(x = srmod_trop$data$fert.total_logRS[
+  srmod_trop$data$Predominant_land_use=="Cropland"],
+  probs = exclQuantiles)
+
+# predict the results
+result <- PredictGLMERRandIter(model = srmod_trop$model,data = pred_tab, nIters = 10000)
+
+# back transform the abundance values
+result <- exp(result)
+
+# convert to relative to reference
+result <- sweep(x = result,MARGIN = 2,STATS = result[refRow,],FUN = '/')
+
+# remove anything above and below the quantiles
+result[which(pred_tab$Predominant_land_use == "Primary vegetation" & pred_tab$fert.total_logRS < QPV[1]), ] <- NA
+result[which(pred_tab$Predominant_land_use == "Primary vegetation" & pred_tab$fert.total_logRS > QPV[2]), ] <- NA
+result[which(pred_tab$Predominant_land_use == "Secondary vegetation" & pred_tab$fert.total_logRS < QSV[1]), ] <- NA
+result[which(pred_tab$Predominant_land_use == "Secondary vegetation" & pred_tab$fert.total_logRS > QSV[2]), ] <- NA
+result[which(pred_tab$Predominant_land_use == "Cropland" & pred_tab$fert.total_logRS < QCR[1]), ] <- NA
+result[which(pred_tab$Predominant_land_use == "Cropland" & pred_tab$fert.total_logRS > QCR[2]), ] <- NA
+
+# Get the median, upper and lower quants for the plot
+pred_tab$PredMedian <- ((apply(X = result,MARGIN = 1,
+                               FUN = median,na.rm=TRUE))*100)-100
+pred_tab$PredUpper <- ((apply(X = result,MARGIN = 1,
+                              FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+pred_tab$PredLower <- ((apply(X = result,MARGIN = 1,
+                              FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+pred_tab$fert_ori <- vals
+
+pred_tab$realm <- "Tropical"
+
+# SR plot = full range
+ggplot(data = pred_tab) +
+    geom_line(aes(x = fert_ori, y = PredMedian, col = Predominant_land_use)) +
+    geom_ribbon(aes(x = fert_ori, ymin= PredLower, ymax = PredUpper, fill = Predominant_land_use), alpha = 0.3) +
+    geom_rug(data = final.data.trans_trop_ABUN, aes(x = fert.total, col = Predominant_land_use), size = 0.1) +
+    geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+    ylim(c(-100,150)) +
+    xlim(c(0, 2000)) +
+    xlab("Total fertiliser application (kgs)") +
+    ylab("Change in species richness (%)") +
+    scale_colour_manual(values = c("#006400", "#8B0000", "#EEAD0E"), labels = c("Primary", "Secondary", "Cropland"))+
+    scale_fill_manual(values = c("#006400", "#8B0000", "#EEAD0E"), labels = c("Primary", "Secondary", "Cropland")) +
+    theme_bw() +
+    theme_custom +
+    theme(legend.position = "none")
+
+
+ggsave(filename = paste0(outdir, "/FertLU_Richtrop_refrow.pdf"), width = 3, height = 3, unit = "in")
+
+
+#### Richness, Temperate ####
+
+from = 0
+to = 2000
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'fert.total_log'
+fac <- 'Use_intensity'
+n <- 3
+logval = TRUE
+
+
+# organise the data
+pred_tab_2 <- sort_data(modout = srmod_temp,
+                        moddata = final.data.trans_temp,
+                        scalers = scalers,
+                        from = from, 
+                        to = to,
+                        vals = vals, 
+                        variable = variable,
+                        fac = fac, 
+                        n = n,
+                        logval = logval)
+
+
+# reference for % difference = primary vegetation and distance closest to 0
+refRow <- which((pred_tab_2$Use_intensity=="Intense use") & (pred_tab_2$fert.total_logRS==min(pred_tab_2$fert.total_logRS)))
+
+
+# sort quantiles
+QMU <- quantile(x = srmod_temp$data$fert.total_logRS[
+  srmod_temp$data$Use_intensity=="Minimal use"],
+  probs = exclQuantiles)
+QLU <- quantile(x = srmod_temp$data$fert.total_logRS[
+  srmod_temp$data$Use_intensity=="Light use"],
+  probs = exclQuantiles)
+QIU <- quantile(x = srmod_temp$data$fert.total_logRS[
+  srmod_temp$data$Use_intensity=="Intense use"],
+  probs = exclQuantiles)
+
+# predict the results
+result2 <- PredictGLMERRandIter(model = srmod_temp$model,data = pred_tab_2, nIters = 10000)
+
+# back transform the abundance values
+result2 <- exp(result2)
+
+# convert to relative to reference
+result2 <- sweep(x = result2,MARGIN = 2,STATS = result2[refRow,],FUN = '/')
+
+
+# remove anything above and below the quantiles
+result2[which(pred_tab_2$Use_intensity == "Minimal use" & pred_tab_2$fert.total_logRS < QMU[1]), ] <- NA
+result2[which(pred_tab_2$Use_intensity == "Minimal use" & pred_tab_2$fert.total_logRS > QMU[2]), ] <- NA
+result2[which(pred_tab_2$Use_intensity == "Light use" & pred_tab_2$fert.total_logRS < QLU[1]), ] <- NA
+result2[which(pred_tab_2$Use_intensity == "Light use" & pred_tab_2$fert.total_logRS > QLU[2]), ] <- NA
+result2[which(pred_tab_2$Use_intensity == "Intense use" & pred_tab_2$fert.total_logRS < QIU[1]), ] <- NA
+result2[which(pred_tab_2$Use_intensity == "Intense use" & pred_tab_2$fert.total_logRS > QIU[2]), ] <- NA
+
+
+# Get the median, upper and lower quants for the plot
+pred_tab_2$PredMedian <- ((apply(X = result2,MARGIN = 1,
+                                 FUN = median,na.rm=TRUE))*100)-100
+pred_tab_2$PredUpper <- ((apply(X = result2,MARGIN = 1,
+                                FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+pred_tab_2$PredLower <- ((apply(X = result2,MARGIN = 1,
+                                FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+pred_tab_2$fert_ori <- vals
+pred_tab_2$realm <- "Non-tropical"
+
+# SR plot = full range
+ggplot(data = pred_tab_2) +
+  geom_line(aes(x = fert_ori, y = PredMedian, col = Use_intensity)) +
+  geom_ribbon(aes(x = fert_ori, ymin= PredLower, ymax = PredUpper, fill = Use_intensity), alpha = 0.3) +
+  geom_rug(data = final.data.trans_trop_ABUN, aes(x = fert.total, col = Use_intensity), size = 0.1) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  ylim(c(-50,100)) +
+  xlim(c(0, 2000)) +
+  xlab("Total fertiliser application (kgs)") +
+  ylab("Change in species richness (%)") +
+  scale_colour_manual(values = c("#66CD00", "#FFB90F", "#EE0000"))+
+  scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
+  theme_bw() +
+  theme_custom 
+
+ggsave(filename = paste0(outdir, "/FertUI_richtemp_Refrow.pdf"), width = 3, height = 3, unit = "in")
+
+
+#### Abundance, temperate ####
+
+from = 0
+to = 2000
+vals <- seq(from = from, to = to, length.out = 1000)
+variable <- 'fert.total_log'
+fac <- 'Use_intensity'
+n <- 3
+logval = TRUE
+
+# organise the data
+pred_tab_3 <- sort_data(modout = abmod_temp,
+                        moddata = final.data.trans_temp_ABUN,
+                        scalers = scalers,
+                        from = from, 
+                        to = to,
+                        vals = vals, 
+                        variable = variable,
+                        fac = fac, 
+                        n = n,
+                        logval = logval)
+
+# reference for % difference = primary vegetation and distance closest to 0
+refRow <- which((pred_tab_3$Use_intensity=="Intense use") & (pred_tab_3$fert.total_logRS==min(pred_tab_3$fert.total_logRS)))
+
+# sort quantiles
+QMU <- quantile(x = abmod_temp$data$fert.total_logRS[
+  abmod_temp$data$Use_intensity=="Minimal use"],
+  probs = exclQuantiles)
+QLU <- quantile(x = abmod_temp$data$fert.total_logRS[
+  abmod_temp$data$Use_intensity=="Light use"],
+  probs = exclQuantiles)
+QIU <- quantile(x = abmod_temp$data$fert.total_logRS[
+  abmod_temp$data$Use_intensity=="Intense use"],
+  probs = exclQuantiles)
+
+# predict the results
+result3 <- PredictGLMERRandIter(model = abmod_temp$model,data = pred_tab_3, nIters = 10000)
+
+# back transform the abundance values
+result3 <- exp(result3)-1
+
+# convert to relative to reference
+result3 <- sweep(x = result3,MARGIN = 2,STATS = result3[refRow,],FUN = '/')
+
+# remove anything above and below the quantiles
+result3[which(pred_tab_3$Use_intensity == "Minimal use" & pred_tab_3$fert.total_logRS < QMU[1]), ] <- NA
+result3[which(pred_tab_3$Use_intensity == "Minimal use" & pred_tab_3$fert.total_logRS > QMU[2]), ] <- NA
+result3[which(pred_tab_3$Use_intensity == "Light use" & pred_tab_3$fert.total_logRS < QLU[1]), ] <- NA
+result3[which(pred_tab_3$Use_intensity == "Light use" & pred_tab_3$fert.total_logRS > QLU[2]), ] <- NA
+result3[which(pred_tab_3$Use_intensity == "Intense use" & pred_tab_3$fert.total_logRS < QIU[1]), ] <- NA
+result3[which(pred_tab_3$Use_intensity == "Intense use" & pred_tab_3$fert.total_logRS > QIU[2]), ] <- NA
+
+# Get the median, upper and lower quants for the plot
+pred_tab_3$PredMedian <- ((apply(X = result3,MARGIN = 1,
+                                 FUN = median,na.rm=TRUE))*100)-100
+pred_tab_3$PredUpper <- ((apply(X = result3,MARGIN = 1,
+                                FUN = quantile,probs = 0.975,na.rm=TRUE))*100)-100
+pred_tab_3$PredLower <- ((apply(X = result3,MARGIN = 1,
+                                FUN = quantile,probs = 0.025,na.rm=TRUE))*100)-100
+
+pred_tab_3$fert_ori <- vals
+
+pred_tab_3$realm <- "Non-tropical"
+
+# SR plot = full range
+ggplot(data = pred_tab_3) +
+geom_line(aes(x = fert_ori, y = PredMedian, col = Use_intensity)) +
+geom_ribbon(aes(x = fert_ori, ymin= PredLower, ymax = PredUpper, fill = Use_intensity), alpha = 0.3) +
+geom_rug(data = final.data.trans_trop_ABUN, aes(x = fert.total, col = Use_intensity), size = 0.1) +
+geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+ylim(c(-100,100)) +
+xlim(c(0, 2000)) +
+xlab("Total fertiliser application (kgs)") +
+ylab("Change in total abundance (%)") +
+scale_colour_manual(values = c("#66CD00", "#FFB90F", "#EE0000"))+
+scale_fill_manual(values = c("#66CD00", "#FFB90F", "#EE0000")) +
+theme_bw() +
+theme_custom + 
+theme(legend.position = "none")
+
+ggsave(filename = paste0(outdir, "/Fert_abuntemp_refrow.pdf"), width = 3, height = 3, unit = "in")
 
 
 
