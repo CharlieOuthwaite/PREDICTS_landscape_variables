@@ -1627,7 +1627,7 @@ plot_data$Predominant_land_use <- sub("Secondary vegetation", "Secondary\nvegeta
 
 plot_data$Predominant_land_use <- factor(plot_data$Predominant_land_use, levels = c("Primary\nvegetation", "Secondary\nvegetation", "Cropland"))
 
-ggplot(data = plot_data)+
+p1 <- ggplot(data = plot_data)+
   geom_point(aes(x = Predominant_land_use, y = median, col = Predominant_land_use, shape = Use_intensity),
              position = position_dodge(width = 0.9), size = 2) +
   geom_errorbar(aes(ymin = lower, ymax = upper, y = median, x = Predominant_land_use, col = Predominant_land_use),
@@ -1639,10 +1639,10 @@ ggplot(data = plot_data)+
   ylab("Total Abundance (%)") +
   theme_bw() +
   theme_custom + 
-  theme(legend.position = c(0.1, 0.8))
+  theme(legend.position = c(0.15, 0.8), strip.background = element_rect(fill = NA, size = 0.2))
   
 
-ggsave(filename = paste0(outdir, "/Supp_Abun_LUUI.pdf"), width = 6, height = 3, unit = "in")
+#ggsave(filename = paste0(outdir, "/Supp_Abun_LUUI.pdf"), width = 6, height = 3, unit = "in")
 
 
 
@@ -1655,7 +1655,7 @@ ggsave(filename = paste0(outdir, "/Supp_Abun_LUUI.pdf"), width = 6, height = 3, 
 
 
 # basic table of median values and reference factors
-pred_tab <- data.frame(landcovers.5kRS = median(final.data.trans_trop$landcovers.5kRS),
+pred_tab3 <- data.frame(landcovers.5kRS = median(final.data.trans_trop$landcovers.5kRS),
                        homogenRS = median(final.data.trans_trop$homogenRS),
                        fert.total_logRS = median(final.data.trans_trop$fert.total_logRS),
                        percNHRS = median(final.data.trans_trop$percNHRS),
@@ -1670,44 +1670,44 @@ pred_tab <- data.frame(landcovers.5kRS = median(final.data.trans_trop$landcovers
 
 # organise factor levels
 # check levels of factor variables
-pred_tab$Predominant_land_use <- factor(pred_tab$Predominant_land_use, levels = levels(srmod_trop$data$Predominant_land_use))
-pred_tab$Use_intensity <- factor(pred_tab$Use_intensity, levels = levels(srmod_trop$data$Use_intensity)) 
-pred_tab$Forest_biome <- factor(pred_tab$Forest_biome, levels = levels(srmod_trop$data$Forest_biome)[c(3, 2, 1)]) 
+pred_tab3$Predominant_land_use <- factor(pred_tab3$Predominant_land_use, levels = levels(srmod_trop$data$Predominant_land_use))
+pred_tab3$Use_intensity <- factor(pred_tab3$Use_intensity, levels = levels(srmod_trop$data$Use_intensity)) 
+pred_tab3$Forest_biome <- factor(pred_tab3$Forest_biome, levels = levels(srmod_trop$data$Forest_biome)[c(3, 2, 1)]) 
 
 
 # add and change factor levels of land use and intensity
 
-pred_tab <- do.call("rbind", replicate(9, pred_tab, simplify = FALSE))
+pred_tab3 <- do.call("rbind", replicate(9, pred_tab3, simplify = FALSE))
 
 
-pred_tab[4:6, 'Predominant_land_use'] <- "Secondary vegetation"
-pred_tab[7:9, 'Predominant_land_use'] <- "Cropland"
+pred_tab3[4:6, 'Predominant_land_use'] <- "Secondary vegetation"
+pred_tab3[7:9, 'Predominant_land_use'] <- "Cropland"
 
-pred_tab[c(2,5,8), 'Use_intensity'] <- "Light use"
-pred_tab[c(3,6,9), 'Use_intensity'] <- "Intense use"
+pred_tab3[c(2,5,8), 'Use_intensity'] <- "Light use"
+pred_tab3[c(3,6,9), 'Use_intensity'] <- "Intense use"
 
 
 ### Tropical predictions ###
 
 # predict the result
-resulta <- PredictGLMERRandIter(model = srmod_trop$model, data = pred_tab)
+resulta <- PredictGLMERRandIter(model = srmod_trop$model, data = pred_tab3)
 
 # transform the results
 resulta <- exp(resulta)
 
 resulta <- sweep(x = resulta, MARGIN = 2, STATS = resulta[1,], FUN = '/')
 
-pred_tab$median <- ((apply(X = resulta, MARGIN = 1, FUN = median))*100)-100
-pred_tab$upper <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.975))*100)-100
-pred_tab$lower <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.025))*100)-100
+pred_tab3$median <- ((apply(X = resulta, MARGIN = 1, FUN = median))*100)-100
+pred_tab3$upper <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.975))*100)-100
+pred_tab3$lower <- ((apply(X = resulta, MARGIN = 1, FUN = quantile,probs = 0.025))*100)-100
 
-pred_tab$realm <- "Tropical"
+pred_tab3$realm <- "Tropical"
 
 # temperate
 
 
 # basic table of median values and reference factors
-pred_tab2 <- data.frame(landcovers.5kRS = median(final.data.trans_temp$landcovers.5kRS),
+pred_tab4 <- data.frame(landcovers.5kRS = median(final.data.trans_temp$landcovers.5kRS),
                         homogenRS = median(final.data.trans_temp$homogenRS),
                         fert.total_logRS = median(final.data.trans_temp$fert.total_logRS),
                         percNHRS = median(final.data.trans_temp$percNHRS),
@@ -1723,52 +1723,52 @@ pred_tab2 <- data.frame(landcovers.5kRS = median(final.data.trans_temp$landcover
 # organise factor levels
 # check levels of factor variables
 
-pred_tab2$Predominant_land_use <- factor(pred_tab2$Predominant_land_use, levels = levels(srmod_temp$data$Predominant_land_use))
-pred_tab2$Use_intensity <- factor(pred_tab2$Use_intensity, levels = levels(srmod_temp$data$Use_intensity)) 
-pred_tab2$Forest_biome <- factor(pred_tab2$Forest_biome, levels = levels(srmod_temp$data$Forest_biome)) 
+pred_tab4$Predominant_land_use <- factor(pred_tab4$Predominant_land_use, levels = levels(srmod_temp$data$Predominant_land_use))
+pred_tab4$Use_intensity <- factor(pred_tab4$Use_intensity, levels = levels(srmod_temp$data$Use_intensity)) 
+pred_tab4$Forest_biome <- factor(pred_tab4$Forest_biome, levels = levels(srmod_temp$data$Forest_biome)) 
 
 
 # add and change factor levels of land use and intensity
 
-pred_tab2 <- do.call("rbind", replicate(9, pred_tab2, simplify = FALSE))
+pred_tab4 <- do.call("rbind", replicate(9, pred_tab4, simplify = FALSE))
 
 
-pred_tab2[4:6, 'Predominant_land_use'] <- "Secondary vegetation"
-pred_tab2[7:9, 'Predominant_land_use'] <- "Cropland"
+pred_tab4[4:6, 'Predominant_land_use'] <- "Secondary vegetation"
+pred_tab4[7:9, 'Predominant_land_use'] <- "Cropland"
 
 
-pred_tab2[c(2,5,8), 'Use_intensity'] <- "Light use"
-pred_tab2[c(3,6,9), 'Use_intensity'] <- "Intense use"
+pred_tab4[c(2,5,8), 'Use_intensity'] <- "Light use"
+pred_tab4[c(3,6,9), 'Use_intensity'] <- "Intense use"
 
 
 #### Richness, Temperate ####
 
 # predict the result
-resulta2 <- PredictGLMERRandIter(model = srmod_temp$model, data = pred_tab2)
+resulta2 <- PredictGLMERRandIter(model = srmod_temp$model, data = pred_tab4)
 
 # transform the results
 resulta2 <- exp(resulta2)
 
 resulta2 <- sweep(x = resulta2, MARGIN = 2, STATS = resulta2[1,], FUN = '/')
 
-pred_tab2$median <- ((apply(X = resulta2, MARGIN = 1, FUN = median))*100)-100
-pred_tab2$upper <- ((apply(X = resulta2, MARGIN = 1, FUN = quantile,probs = 0.975))*100)-100
-pred_tab2$lower <- ((apply(X = resulta2, MARGIN = 1, FUN = quantile,probs = 0.025))*100)-100
+pred_tab4$median <- ((apply(X = resulta2, MARGIN = 1, FUN = median))*100)-100
+pred_tab4$upper <- ((apply(X = resulta2, MARGIN = 1, FUN = quantile,probs = 0.975))*100)-100
+pred_tab4$lower <- ((apply(X = resulta2, MARGIN = 1, FUN = quantile,probs = 0.025))*100)-100
 
-pred_tab2$realm <- "Non-tropical"
+pred_tab4$realm <- "Non-tropical"
 
-plot_data <- rbind(pred_tab, pred_tab2)
+plot_data2 <- rbind(pred_tab3, pred_tab4)
 
-plot_data[plot_data$upper == 0, c("upper", "lower")] <- NA
+plot_data2[plot_data2$upper == 0, c("upper", "lower")] <- NA
 
-plot_data$realm <- factor(plot_data$realm, levels = c("Tropical", "Non-tropical"))
+plot_data2$realm <- factor(plot_data2$realm, levels = c("Tropical", "Non-tropical"))
 
-plot_data$Predominant_land_use <- sub("Primary vegetation", "Primary\nvegetation", plot_data$Predominant_land_use)
-plot_data$Predominant_land_use <- sub("Secondary vegetation", "Secondary\nvegetation", plot_data$Predominant_land_use)
+plot_data2$Predominant_land_use <- sub("Primary vegetation", "Primary\nvegetation", plot_data2$Predominant_land_use)
+plot_data2$Predominant_land_use <- sub("Secondary vegetation", "Secondary\nvegetation", plot_data2$Predominant_land_use)
 
-plot_data$Predominant_land_use <- factor(plot_data$Predominant_land_use, levels = c("Primary\nvegetation", "Secondary\nvegetation", "Cropland"))
+plot_data2$Predominant_land_use <- factor(plot_data2$Predominant_land_use, levels = c("Primary\nvegetation", "Secondary\nvegetation", "Cropland"))
 
-ggplot(data = plot_data)+
+p2 <- ggplot(data = plot_data2)+
   geom_point(aes(x = Predominant_land_use, y = median, col = Predominant_land_use, shape = Use_intensity),
              position = position_dodge(width = 0.9), size = 2) +
   geom_errorbar(aes(ymin = lower, ymax = upper, y = median, x = Predominant_land_use, col = Predominant_land_use),
@@ -1780,9 +1780,11 @@ ggplot(data = plot_data)+
   ylab("Species Richness (%)") +
   theme_bw() +
   theme_custom +
-  theme(legend.position = "none")
+  theme(legend.position = "none", strip.background = element_rect(fill = NA, size = 0.2))
 
-ggsave(filename = paste0(outdir, "/Supp_Rich_LUUI.pdf"), width = 6, height = 3, uni = "in")
+#ggsave(filename = paste0(outdir, "/Supp_Rich_LUUI.pdf"), width = 6, height = 3, uni = "in")
 
 
+cowplot::plot_grid(p1, p2, nrow = 2, labels = c("(a)", "(b)"), label_size = 10)
 
+ggsave(filename = paste0(outdir, "/Figure2_LUUI.pdf"), width = 6, height = 6, uni = "in")
