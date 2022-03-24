@@ -308,8 +308,10 @@ library(ggplot2)
 theme_custom <- theme(panel.grid = element_blank(),
                       legend.position = c(0.8,0.8), legend.title = element_blank(),
                       legend.text = element_text(size = 8),
+                      axis.text = element_text(size = 8),
+                      axis.title = element_text(size = 8),
                       aspect.ratio = 1, legend.background = element_blank(),
-                      text = element_text(size = 8), 
+                      #text = element_text(size = 8), 
                       line = element_line(size = 0.2), 
                       panel.border = element_rect(size = 0.2),
                       strip.background = element_rect(size = 0.2),
@@ -680,7 +682,7 @@ dif_tab2$test <- factor(dif_tab2$test, levels = rev(c("Distance to forest",
                                                     "Percentage Natural\n Habitat", "Total Fertiliser",
                                                     "Number of\n Landcovers", "Homogeneity")))
 
-dif_tab2$realm <- factor(dif_tab2$realm, levels = c("Tropical", "Non-tropical"))
+dif_tab2$realm <- factor(dif_tab2$realm, levels = c("Non-tropical", "Tropical"))
 
 dif_tab2$colour <- factor(dif_tab2$colour, levels = rev(c("Minimal use", " Light use", "Intense use", "Primary vegetation", "Secondary vegetation", "Cropland")))
 
@@ -694,40 +696,67 @@ dif_tab2$metric <- factor(dif_tab2$metric, levels = c("Total Abundance", "Specie
 # dif_tab$upper[dif_tab$upper == 0] <- NA
 
 
+dif_tab2 <- droplevels(dif_tab2)
+
+
 ggplot(data = dif_tab2[dif_tab2$cat == "Land Use", ]) + 
-  geom_point(aes(x = test, y = median,  col = colour, shape = colour), position = position_dodge(width = 0.9), size = 1.5) +
-  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour), 
+  geom_point(aes(x = test, y = median,  col = colour, shape = colour, alpha = realm), position = position_dodge(width = 0.9), size = 1.5) +
+  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour, alpha = realm), 
                 position = position_dodge2(padding = 0.5),
                 size = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
-  facet_grid(realm~  metric) + coord_flip() +
-  ylab("Percentage Change") + 
+  #facet_grid(realm~  metric) + coord_flip() +
+  #facet_grid(~ realm ) 
+  coord_flip() +
+    ylab("Percentage Change") + 
   scale_color_manual(values = rev(c("#006400", "#8B0000", "#EEAD0E"))) +
   theme_bw() +
   theme_custom + 
-  theme(legend.position = "bottom", strip.background = element_rect(fill = NA))
+  theme(legend.position = "bottom", strip.background = element_rect(fill = NA),legend.box="vertical",)
 
 
-ggsave(filename = paste0(outdir, "/Difference_interactions_LU_plot.pdf"), height = 6, width = 6, units = "in")  
+ggsave(filename = paste0(outdir, "/Difference_interactions_LU_plotV2.pdf"), height = 5, width = 5, units = "in")  
 
 #"#66CD00", "#FFB90F", "#EE0000" minimal, light, intense
 
 #"#006400", "#8B0000", "#EEAD0E" primary, secondary, cropland
 
 
-ggplot(data = dif_tab2[dif_tab2$cat == "Use Intensity", ]) + 
+p1 <- ggplot(data = dif_tab2[dif_tab2$cat == "Use Intensity" & dif_tab2$realm == "Tropical", ]) + 
   geom_point(aes(x = test, y = median, col = colour, shape = colour), position = position_dodge(width = 0.9), size = 1.5) +
   geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour), 
                 position = position_dodge2(padding = 0.5),
                 size = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
-  facet_grid(realm~  metric) + coord_flip() +
+  facet_grid(~  metric) + coord_flip() +
   ylab("Percentage Change") + 
   scale_color_manual(values = rev(c("#66CD00", "#FFB90F", "#EE0000"))) +
+  ylim(c(-80, 220)) +
+  theme_bw() +
+  theme_custom + 
+  theme(legend.position = "none", strip.background = element_rect(fill = NA))
+
+p2 <- ggplot(data = dif_tab2[dif_tab2$cat == "Use Intensity" & dif_tab2$realm == "Non-tropical", ]) + 
+  geom_point(aes(x = test, y = median, col = colour, shape = colour), position = position_dodge(width = 0.9), size = 1.5) +
+  geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour), 
+                position = position_dodge2(padding = 0.5),
+                size = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
+  facet_grid(~  metric) + coord_flip() +
+  ylab("Percentage Change") + 
+  scale_color_manual(values = rev(c("#66CD00", "#FFB90F", "#EE0000"))) +
+  ylim(c(-80, 220)) +
   theme_bw() +
   theme_custom + 
   theme(legend.position = "bottom", strip.background = element_rect(fill = NA))
 
 
+library(cowplot)
 
-ggsave(filename = paste0(outdir, "/Difference_interactions_UI_plot.pdf"), height = 6, width = 6, units = "in")  
+
+legend <- get_legend(p2)
+
+plot_grid(p1, p2 +  theme(legend.position = "none"), legend,  nrow = 3, rel_heights = c(1,1,0.2))
+
+
+ggsave(filename = paste0(outdir, "/Difference_interactions_UI_plotV2.pdf"), height = 7, width = 6, units = "in")  
