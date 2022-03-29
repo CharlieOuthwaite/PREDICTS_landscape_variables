@@ -320,11 +320,11 @@ p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
   annotate(geom = "text", label = r2lab, x = 55, y = 450, parse = T) +
-  labs(x='Predicted Values', y='Actual Values')+
+  labs(x='Predicted Values', y='Observed Values')+
   theme_bw()
 
 cowplot::plot_grid(p2,p3,p4,
-                   labels = c("a.", "b.", "c."), nrow = 2)
+                   labels = c("A.", "B.", "C."), nrow = 2)
 
 
 ggsave(file = paste0(outdir, "/SR_Tropical_model_checks_plots.pdf"), height = 9, width = 9)
@@ -390,11 +390,11 @@ p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
   annotate(geom = "text", label = r2lab, x = 30, y = 255, parse = T) +
-  labs(x='Predicted Values', y='Actual Values')+
+  labs(x='Predicted Values', y='Observed Values')+
   theme_bw()
 
 cowplot::plot_grid(p2,p3,p4,
-                   labels = c("a.", "b.", "c."), nrow = 2)
+                   labels = c("A.", "B.", "C."), nrow = 2)
 
 
 

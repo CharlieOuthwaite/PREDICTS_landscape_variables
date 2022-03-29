@@ -365,11 +365,11 @@ p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
   annotate(geom = "text", label = r2lab, x = 3, y = 25, parse = T) +
-  labs(x='Predicted Values', y='Actual Values')+
+  labs(x='Predicted Values', y='Observed Values')+
   theme_bw()
 
 cowplot::plot_grid(p1,p2,p3,p4,
-          labels = c("a.", "b.", "c.", "d."), nrow = 2)
+          labels = c("A.", "B.", "C.", "D."), nrow = 2)
 
 
 ggsave(file = paste0(outdir, "/Abun_Temperate_model_checks_plots.pdf"), height = 9, width = 9)
@@ -442,12 +442,12 @@ r2lab <- paste("R^2 == ", R2, sep = "")
 p4 <- ggplot(df, aes(x=df[, 1], y= df[,2])) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
-  annotate(geom = "text", label = r2lab, x = 3, y = 25, parse = T) +
-  labs(x='Predicted Values', y='Actual Values')+
+  annotate(geom = "text", label = r2lab, x = 1.5, y = 12, parse = T) +
+  labs(x='Predicted Values', y='Observed Values')+
   theme_bw()
 
 cowplot::plot_grid(p1,p2,p3,p4,
-                   labels = c("a.", "b.", "c.", "d."), nrow = 2)
+                   labels = c("A.", "B.", "C.", "D."), nrow = 2)
 
 
 
