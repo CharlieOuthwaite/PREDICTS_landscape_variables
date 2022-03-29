@@ -541,7 +541,8 @@ pairs(sites.sub[ , c(21:34)],
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
-      cex = 2)
+      cex.axis = 2,
+      cex.labels= 1.2)
 
 dev.off()
 
@@ -568,11 +569,11 @@ sites.sub_trop <- sites.sub[sites.sub$Tropical == "Tropical", ]
 pdf(file = paste0(outdir, "/Correlations_all_Trop.pdf"), width =14, height = 9)
 
 # correlations, including all nlandcovers buffers
-pairs(sites.sub_trop[ , c(21:24, 26,27,32:34)], 
+pairs(sites.sub_trop[ , c(22:25,27, 28,33:35)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
-      cex = 2)
+      cex.axis = 2)
 
 dev.off()
 
@@ -580,11 +581,11 @@ sites.sub_temp <- sites.sub[sites.sub$Tropical == "Temperate", ]
 
 pdf(file = paste0(outdir, "/Correlations_all_Temp.pdf"), width =14, height = 9)
 # correlations, including all nlandcovers buffers
-pairs(sites.sub_temp[ , c(21:24, 26,27,32:34)], 
+pairs(sites.sub_temp[ , c(22:25,27, 28,33:35)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
-      cex = 2)
+      cex.axis = 2)
 
 dev.off()
 
@@ -722,20 +723,22 @@ nrow(final.data.trans_temp) # 6674
 
 pdf(file = paste0(outdir, "/Correlations_final_variables_Trop.pdf"), width =9, height = 9)
 # correlations of final set of variables - transformed
-pairs(final.data.trans_trop[ , c(23:25, 27:28)], 
+pairs(final.data.trans_trop[ , c(24:26, 28:29)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
-      cex.labels = 1.3)
+      cex.labels = 1.3, 
+      cex.axis = 2)
 dev.off()
 
 pdf(file = paste0(outdir, "/Correlations_final_variables_Temp.pdf"), width =9, height = 9)
 # correlations of final set of variables - transformed
-pairs(final.data.trans_temp[ , c(23:25, 27:28)], 
+pairs(final.data.trans_temp[ , c(24:26, 28:29)], 
       upper.panel=panel.cor, 
       diag.panel = panel.hist, 
       main = "",
-      cex.labels = 1.3)
+      cex.labels = 1.3, 
+      cex.axis = 2)
 dev.off()
 
 ##%######################################################%##
