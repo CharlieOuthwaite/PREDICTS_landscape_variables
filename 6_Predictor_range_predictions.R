@@ -307,9 +307,9 @@ library(ggplot2)
 
 theme_custom <- theme(panel.grid = element_blank(),
                       legend.position = c(0.8,0.8), legend.title = element_blank(),
-                      legend.text = element_text(size = 8),
-                      axis.text = element_text(size = 8),
-                      axis.title = element_text(size = 8),
+                      legend.text = element_text(size = 10),
+                      axis.text = element_text(size = 10),
+                      axis.title = element_text(size = 10),
                       aspect.ratio = 1, legend.background = element_blank(),
                       #text = element_text(size = 8), 
                       line = element_line(size = 0.2), 
@@ -365,7 +365,7 @@ ggplot(data = dif_tab) +
 
 
 
-ggsave(filename = paste0(outdir, "/Difference_plot.pdf"), width = 6, height = 3, unit = "in")  
+ggsave(filename = paste0(outdir, "/Difference_plot.pdf"), width = 6.5, height = 3.5, unit = "in")  
 
 
 
@@ -703,7 +703,8 @@ ggplot(data = dif_tab2[dif_tab2$cat == "Land Use", ]) +
   geom_point(aes(x = test, y = median,  col = colour, shape = colour, alpha = realm), position = position_dodge(width = 0.9), size = 1.5) +
   geom_errorbar(aes(x = test, y = median, ymin = lower, ymax = upper, col = colour, alpha = realm), 
                 position = position_dodge2(padding = 0.5),
-                size = 0.2) +
+                size = 0.2,
+                width = 0.9) +
   geom_hline(yintercept = 0, linetype = "dashed", size = 0.2) +
   #facet_grid(realm~  metric) + coord_flip() +
   #facet_grid(~ realm ) 
@@ -712,10 +713,10 @@ ggplot(data = dif_tab2[dif_tab2$cat == "Land Use", ]) +
   scale_color_manual(values = rev(c("#006400", "#8B0000", "#EEAD0E"))) +
   theme_bw() +
   theme_custom + 
-  theme(legend.position = "bottom", strip.background = element_rect(fill = NA),legend.box="vertical",)
+  theme(legend.position = "bottom", strip.background = element_rect(fill = NA),legend.box="vertical")
 
 
-ggsave(filename = paste0(outdir, "/Difference_interactions_LU_plotV2.pdf"), height = 5, width = 5, units = "in")  
+ggsave(filename = paste0(outdir, "/Difference_interactions_LU_plotV2.pdf"), height = 5, width = 6, units = "in")  
 
 #"#66CD00", "#FFB90F", "#EE0000" minimal, light, intense
 
@@ -756,7 +757,7 @@ library(cowplot)
 
 legend <- get_legend(p2)
 
-plot_grid(p1, p2 +  theme(legend.position = "none"), legend,  nrow = 3, rel_heights = c(1,1,0.2))
+cowplot::plot_grid(p1, p2 +  theme(legend.position = "none"), legend,  nrow = 3, rel_heights = c(1,1,0.2))
 
 
 ggsave(filename = paste0(outdir, "/Difference_interactions_UI_plotV2.pdf"), height = 7, width = 6, units = "in")  
